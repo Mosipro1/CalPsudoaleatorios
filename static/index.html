@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generador de N&uacute;meros Pseudoaleatorios</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:20px}
+h1{text-align:center;margin-bottom:20px;font-size:1.4rem}
+.tabs{display:flex;gap:4px;margin-bottom:0}
+.tabs button{padding:10px 18px;border:1px solid #ccc;background:#e0e0e0;cursor:pointer;font-size:.9rem;border-radius:6px 6px 0 0;transition:.2s}
+.tabs button.active{background:#fff;border-bottom-color:#fff;font-weight:600}
+.tab-content{display:none;background:#fff;border:1px solid #ccc;border-top:none;padding:20px;border-radius:0 6px 6px;min-height:400px}
+.tab-content.active{display:block}
+.form-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;max-width:450px;margin-bottom:16px;align-items:center}
+.form-grid label{text-align:right;font-size:.9rem}
+.form-grid input{padding:6px 10px;border:1px solid #bbb;border-radius:4px;font-size:.9rem;width:100%}
+.btn{background:#2563eb;color:#fff;border:none;padding:8px 24px;border-radius:4px;cursor:pointer;font-size:.9rem}
+.btn:hover{background:#1d4ed8}
+.btn.clear{background:#6b7280}
+.btn.clear:hover{background:#4b5563}
+.actions{display:flex;gap:8px;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:6px 10px;text-align:center;border:1px solid #ddd}
+th{background:#f0f0f0;position:sticky;top:0}
+.table-wrap{max-height:350px;overflow-y:auto;border:1px solid #ddd;border-radius:4px}
+.error{color:#dc2626;margin-bottom:10px;font-size:.9rem;display:none}
+</style>
+</head>
+<body>
+
+<h1>Generador de N&uacute;meros Pseudoaleatorios</h1>
+
+<div class="tabs">
+  <button class="active" data-tab="mc">Multiplicador Constante</button>
+  <button data-tab="pm">Productos Medios</button>
+  <button data-tab="cm">Cuadrados Medios</button>
+</div>
+
+<!-- Multiplicador Constante -->
+<div id="tab-mc" class="tab-content active">
+  <div class="form-grid">
+    <label>Semilla:</label> <input id="mc-semilla" value="1234">
+    <label>Constante (a):</label> <input id="mc-constante" value="5">
+    <label>Valor Inicial (X₀):</label> <input id="mc-x0" value="1234">
+    <label>Iteraciones:</label> <input id="mc-iter" value="10">
+    <label>D&iacute;gitos Centrales:</label> <input id="mc-digitos" value="4">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="generar('mc')">Generar</button>
+    <button class="btn clear" onclick="limpiar('mc')">Limpiar</button>
+  </div>
+  <div id="mc-error" class="error"></div>
+  <div class="table-wrap" id="mc-table-wrap">
+    <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mc-body"></tbody></table>
+  </div>
+</div>
+
+<!-- Productos Medios -->
+<div id="tab-pm" class="tab-content">
+  <div class="form-grid">
+    <label>Semilla 1:</label> <input id="pm-semilla1" value="1234">
+    <label>Semilla 2:</label> <input id="pm-semilla2" value="5678">
+    <label>Iteraciones:</label> <input id="pm-iter" value="10">
+    <label>D&iacute;gitos Centrales:</label> <input id="pm-digitos" value="4">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="generar('pm')">Generar</button>
+    <button class="btn clear" onclick="limpiar('pm')">Limpiar</button>
+  </div>
+  <div id="pm-error" class="error"></div>
+  <div class="table-wrap" id="pm-table-wrap">
+    <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="pm-body"></tbody></table>
+  </div>
+</div>
+
+<!-- Cuadrados Medios -->
+<div id="tab-cm" class="tab-content">
+  <div class="form-grid">
+    <label>Semilla:</label> <input id="cm-semilla" value="1234">
+    <label>Iteraciones:</label> <input id="cm-iter" value="10">
+    <label>D&iacute;gitos Centrales:</label> <input id="cm-digitos" value="4">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="generar('cm')">Generar</button>
+    <button class="btn clear" onclick="limpiar('cm')">Limpiar</button>
+  </div>
+  <div id="cm-error" class="error"></div>
+  <div class="table-wrap" id="cm-table-wrap">
+    <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cm-body"></tbody></table>
+  </div>
+</div>
+
+<script>
+const ENDPOINTS = {
+  mc: "/api/multiplicador_constante",
+  pm: "/api/productos_medios",
+  cm: "/api/cuadrados_medios"
+};
+
+document.querySelectorAll(".tabs button").forEach(b => {
+  b.addEventListener("click", () => {
+    document.querySelectorAll(".tabs button").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    document.getElementById("tab-" + b.dataset.tab).classList.add("active");
+  });
+});
+
+function obtenerBody(modo) {
+  if (modo === "mc") {
+    return {
+      semilla: document.getElementById("mc-semilla").value,
+      constante_a: document.getElementById("mc-constante").value,
+      valor_inicial: document.getElementById("mc-x0").value,
+      iteraciones: document.getElementById("mc-iter").value,
+      digitos: document.getElementById("mc-digitos").value
+    };
+  } else if (modo === "pm") {
+    return {
+      semilla1: document.getElementById("pm-semilla1").value,
+      semilla2: document.getElementById("pm-semilla2").value,
+      iteraciones: document.getElementById("pm-iter").value,
+      digitos: document.getElementById("pm-digitos").value
+    };
+  } else {
+    return {
+      semilla: document.getElementById("cm-semilla").value,
+      iteraciones: document.getElementById("cm-iter").value,
+      digitos: document.getElementById("cm-digitos").value
+    };
+  }
+}
+
+function generar(modo) {
+  const errEl = document.getElementById(modo + "-error");
+  const body = obtenerBody(modo);
+  errEl.style.display = "none";
+
+  fetch(ENDPOINTS[modo], {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = "block"; return; }
+    const tbody = document.getElementById(modo + "-body");
+    tbody.innerHTML = "";
+    data.forEach(d => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${d.iteracion}</td><td>${d.xn}</td><td>${d.ri.toFixed(parseInt(body.digitos) || 4)}</td>`;
+      tbody.appendChild(tr);
+    });
+  })
+  .catch(e => {
+    errEl.textContent = "Error de conexi&oacute;n";
+    errEl.style.display = "block";
+  });
+}
+
+function limpiar(modo) {
+  document.getElementById(modo + "-body").innerHTML = "";
+  document.getElementById(modo + "-error").style.display = "none";
+}
+</script>
+</body>
+</html>
