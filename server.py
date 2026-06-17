@@ -30,23 +30,40 @@ class Handler(BaseHTTPRequestHandler):
         try:
             if path.endswith("/multiplicador_constante"):
                 r = multiplicador_constante.generar(
-                    int(body["semilla"]), int(body["constante_a"]),
+                    int(body["constante_a"]),
                     int(body["valor_inicial"]), int(body["iteraciones"]), int(body["digitos"])
+                )
+            elif path.endswith("/multiplicador_constante/periodo"):
+                r = multiplicador_constante.calcular_periodo(
+                    int(body["constante_a"]), int(body["valor_inicial"]), int(body["digitos"])
                 )
             elif path.endswith("/productos_medios"):
                 r = productos_medios.generar(
                     int(body["semilla1"]), int(body["semilla2"]),
                     int(body["iteraciones"]), int(body["digitos"])
                 )
+            elif path.endswith("/productos_medios/periodo"):
+                r = productos_medios.calcular_periodo(
+                    int(body["semilla1"]), int(body["semilla2"]), int(body["digitos"])
+                )
             elif path.endswith("/cuadrados_medios"):
                 r = cuadrados_medios.generar(
                     int(body["semilla"]), int(body["iteraciones"]), int(body["digitos"])
                 )
+            elif path.endswith("/cuadrados_medios/periodo"):
+                r = cuadrados_medios.calcular_periodo(
+                    int(body["semilla"]), int(body["digitos"])
+                )
             else:
                 self._respond(404, "application/json", json.dumps({"error": "ruta no encontrada"}).encode())
                 return
-            d = int(body.get("digitos", 4))
-            data = [{"iteracion": it, "xn": xn, "ri": round(ri, d)} for it, xn, ri in r]
+
+            if isinstance(r, list):
+                d = int(body.get("digitos", 4))
+                data = [{"iteracion": it, "xn": xn, "ri": round(ri, d)} for it, xn, ri in r]
+            else:
+                data = r
+
             self._respond(200, "application/json", json.dumps(data).encode())
         except Exception as e:
             self._respond(400, "application/json", json.dumps({"error": str(e)}).encode())

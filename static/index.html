@@ -13,14 +13,19 @@ h1{text-align:center;margin-bottom:20px;font-size:1.4rem}
 .tabs button.active{background:#fff;border-bottom-color:#fff;font-weight:600}
 .tab-content{display:none;background:#fff;border:1px solid #ccc;border-top:none;padding:20px;border-radius:0 6px 6px;min-height:400px}
 .tab-content.active{display:block}
-.form-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;max-width:450px;margin-bottom:16px;align-items:center}
+.form-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;max-width:450px;margin-bottom:8px;align-items:center}
 .form-grid label{text-align:right;font-size:.9rem}
 .form-grid input{padding:6px 10px;border:1px solid #bbb;border-radius:4px;font-size:.9rem;width:100%}
 .btn{background:#2563eb;color:#fff;border:none;padding:8px 24px;border-radius:4px;cursor:pointer;font-size:.9rem}
 .btn:hover{background:#1d4ed8}
 .btn.clear{background:#6b7280}
 .btn.clear:hover{background:#4b5563}
-.actions{display:flex;gap:8px;margin-bottom:16px}
+.btn.periodo{background:#059669}
+.btn.periodo:hover{background:#047857}
+.actions{display:flex;gap:8px;margin-bottom:8px}
+.periodo-result{font-size:.85rem;margin-bottom:12px;padding:6px 10px;border-radius:4px;display:none}
+.periodo-result.ok{display:block;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.periodo-result.err{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th,td{padding:6px 10px;text-align:center;border:1px solid #ddd}
 th{background:#f0f0f0;position:sticky;top:0}
@@ -41,7 +46,6 @@ th{background:#f0f0f0;position:sticky;top:0}
 <!-- Multiplicador Constante -->
 <div id="tab-mc" class="tab-content active">
   <div class="form-grid">
-    <label>Semilla:</label> <input id="mc-semilla" value="1234">
     <label>Constante (a):</label> <input id="mc-constante" value="5">
     <label>Valor Inicial (X₀):</label> <input id="mc-x0" value="1234">
     <label>Iteraciones:</label> <input id="mc-iter" value="10">
@@ -50,7 +54,9 @@ th{background:#f0f0f0;position:sticky;top:0}
   <div class="actions">
     <button class="btn" onclick="generar('mc')">Generar</button>
     <button class="btn clear" onclick="limpiar('mc')">Limpiar</button>
+    <button class="btn periodo" onclick="verificarPeriodo('mc')">Verificar Per&iacute;odo</button>
   </div>
+  <div id="mc-periodo" class="periodo-result"></div>
   <div id="mc-error" class="error"></div>
   <div class="table-wrap" id="mc-table-wrap">
     <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mc-body"></tbody></table>
@@ -68,7 +74,9 @@ th{background:#f0f0f0;position:sticky;top:0}
   <div class="actions">
     <button class="btn" onclick="generar('pm')">Generar</button>
     <button class="btn clear" onclick="limpiar('pm')">Limpiar</button>
+    <button class="btn periodo" onclick="verificarPeriodo('pm')">Verificar Per&iacute;odo</button>
   </div>
+  <div id="pm-periodo" class="periodo-result"></div>
   <div id="pm-error" class="error"></div>
   <div class="table-wrap" id="pm-table-wrap">
     <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="pm-body"></tbody></table>
@@ -85,7 +93,9 @@ th{background:#f0f0f0;position:sticky;top:0}
   <div class="actions">
     <button class="btn" onclick="generar('cm')">Generar</button>
     <button class="btn clear" onclick="limpiar('cm')">Limpiar</button>
+    <button class="btn periodo" onclick="verificarPeriodo('cm')">Verificar Per&iacute;odo</button>
   </div>
+  <div id="cm-periodo" class="periodo-result"></div>
   <div id="cm-error" class="error"></div>
   <div class="table-wrap" id="cm-table-wrap">
     <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cm-body"></tbody></table>
@@ -97,6 +107,12 @@ const ENDPOINTS = {
   mc: "/api/multiplicador_constante",
   pm: "/api/productos_medios",
   cm: "/api/cuadrados_medios"
+};
+
+const PERIOD_ENDPOINTS = {
+  mc: "/api/multiplicador_constante/periodo",
+  pm: "/api/productos_medios/periodo",
+  cm: "/api/cuadrados_medios/periodo"
 };
 
 document.querySelectorAll(".tabs button").forEach(b => {
@@ -111,7 +127,6 @@ document.querySelectorAll(".tabs button").forEach(b => {
 function obtenerBody(modo) {
   if (modo === "mc") {
     return {
-      semilla: document.getElementById("mc-semilla").value,
       constante_a: document.getElementById("mc-constante").value,
       valor_inicial: document.getElementById("mc-x0").value,
       iteraciones: document.getElementById("mc-iter").value,
@@ -160,9 +175,49 @@ function generar(modo) {
   });
 }
 
+function verificarPeriodo(modo) {
+  const errEl = document.getElementById(modo + "-error");
+  const periodoEl = document.getElementById(modo + "-periodo");
+  periodoEl.className = "periodo-result";
+  errEl.style.display = "none";
+
+  const body = obtenerBody(modo);
+  delete body.iteraciones;
+
+  fetch(PERIOD_ENDPOINTS[modo], {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) {
+      periodoEl.className = "periodo-result err";
+      periodoEl.textContent = data.error;
+      return;
+    }
+    if (data.unicos !== undefined) {
+      periodoEl.className = "periodo-result ok";
+      periodoEl.textContent =
+        `Per\u00edodo: ${data.unicos} n\u00fameros \u00fanicos ` +
+        `(ciclo de ${data.longitud_ciclo}, repite ${data.valor_repetido} en iteraci\u00f3n ${data.iteracion_repetida})`;
+    } else {
+      periodoEl.className = "periodo-result err";
+      periodoEl.textContent = "No se encontr\u00f3 repetici\u00f3n en el l\u00edmite establecido";
+    }
+  })
+  .catch(e => {
+    periodoEl.className = "periodo-result err";
+    periodoEl.textContent = "Error de conexi\u00f3n";
+  });
+}
+
 function limpiar(modo) {
   document.getElementById(modo + "-body").innerHTML = "";
   document.getElementById(modo + "-error").style.display = "none";
+  const periodoEl = document.getElementById(modo + "-periodo");
+  periodoEl.className = "periodo-result";
+  periodoEl.style.display = "none";
 }
 </script>
 </body>

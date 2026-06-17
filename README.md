@@ -1,6 +1,6 @@
-# Generador de Números Pseudoaleatorios
+# Generador de Números Pseudoaleatorios v1.2
 
-Tres métodos de generación de números pseudoaleatorios con interfaz web.
+Tres métodos de generación de números pseudoaleatorios con interfaz web (Tkinter y navegador).
 
 ## Requisitos
 
@@ -27,6 +27,7 @@ Abrir en el navegador: [http://localhost:8000](http://localhost:8000)
 2. Ingresar los parámetros (semillas, constantes, iteraciones, dígitos centrales).
 3. Presionar **Generar** para ver los resultados en la tabla.
 4. Usar **Limpiar** para borrar la tabla.
+5. Presionar **Verificar Período** para calcular cuántos números únicos puede generar el método antes de repetir un valor.
 
 ## Métodos
 

@@ -55,16 +55,18 @@ class App:
         input_frame = ttk.LabelFrame(tab, text="Parámetros", padding=10)
         input_frame.pack(fill='x', pady=(0, 10))
 
-        self.mc_semilla = self._crear_input(input_frame, "Semilla:", 0, "1234")
-        self.mc_constante = self._crear_input(input_frame, "Constante (a):", 1, "5")
-        self.mc_valor_ini = self._crear_input(input_frame, "Valor Inicial (X₀):", 2, "1234")
-        self.mc_iteraciones = self._crear_input(input_frame, "Iteraciones:", 3, "10")
-        self.mc_digitos = self._crear_input(input_frame, "Dígitos Centrales:", 4, "4")
+        self.mc_constante = self._crear_input(input_frame, "Constante (a):", 0, "5")
+        self.mc_valor_ini = self._crear_input(input_frame, "Valor Inicial (X₀):", 1, "1234")
+        self.mc_iteraciones = self._crear_input(input_frame, "Iteraciones:", 2, "10")
+        self.mc_digitos = self._crear_input(input_frame, "Dígitos Centrales:", 3, "4")
+        self.mc_periodo_label = tk.Label(input_frame, text="", fg="#2563eb", bg="#f0f0f0")
+        self.mc_periodo_label.grid(row=4, column=0, columnspan=2, pady=(5, 0))
 
         btn_frame = ttk.Frame(tab)
         btn_frame.pack(fill='x', pady=5)
         ttk.Button(btn_frame, text="Generar", command=self._mc_generar).pack(side='left', padx=5)
         ttk.Button(btn_frame, text="Limpiar", command=self._mc_limpiar).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text="Verificar Período", command=self._mc_verificar_periodo).pack(side='left', padx=5)
 
         table_frame = ttk.LabelFrame(tab, text="Resultados", padding=5)
         table_frame.pack(fill='both', expand=True, pady=(10, 0))
@@ -73,13 +75,12 @@ class App:
 
     def _mc_generar(self):
         try:
-            semilla = int(self.mc_semilla.get())
             constante = int(self.mc_constante.get())
             valor_ini = int(self.mc_valor_ini.get())
             iteraciones = int(self.mc_iteraciones.get())
             digitos = int(self.mc_digitos.get())
             self._validar_positivos(constante, valor_ini, iteraciones, digitos)
-            resultados = multiplicador_constante.generar(semilla, constante, valor_ini, iteraciones, digitos)
+            resultados = multiplicador_constante.generar(constante, valor_ini, iteraciones, digitos)
             self._mc_limpiar()
             for it, xn, ri in resultados:
                 self.mc_tree.insert('', 'end', values=(it, xn, f"{ri:.{digitos}f}"))
@@ -89,6 +90,23 @@ class App:
     def _mc_limpiar(self):
         for item in self.mc_tree.get_children():
             self.mc_tree.delete(item)
+
+    def _mc_verificar_periodo(self):
+        try:
+            constante = int(self.mc_constante.get())
+            valor_ini = int(self.mc_valor_ini.get())
+            digitos = int(self.mc_digitos.get())
+            self._validar_positivos(constante, valor_ini, digitos)
+            periodo = multiplicador_constante.calcular_periodo(constante, valor_ini, digitos)
+            if periodo is None:
+                self.mc_periodo_label.config(text="No se encontró repetición en el límite establecido", fg="#dc2626")
+            else:
+                self.mc_periodo_label.config(
+                    text=f"✓ Período: {periodo['unicos']} números únicos (ciclo de {periodo['longitud_ciclo']}, repite {periodo['valor_repetido']} en iteración {periodo['iteracion_repetida']})",
+                    fg="#2563eb"
+                )
+        except ValueError as e:
+            messagebox.showerror("Error de entrada", str(e))
 
     # ── Módulo 2: Productos Medios ──
 
@@ -103,11 +121,14 @@ class App:
         self.pm_semilla2 = self._crear_input(input_frame, "Semilla 2:", 1, "5678")
         self.pm_iteraciones = self._crear_input(input_frame, "Iteraciones:", 2, "10")
         self.pm_digitos = self._crear_input(input_frame, "Dígitos Centrales:", 3, "4")
+        self.pm_periodo_label = tk.Label(input_frame, text="", fg="#2563eb", bg="#f0f0f0")
+        self.pm_periodo_label.grid(row=4, column=0, columnspan=2, pady=(5, 0))
 
         btn_frame = ttk.Frame(tab)
         btn_frame.pack(fill='x', pady=5)
         ttk.Button(btn_frame, text="Generar", command=self._pm_generar).pack(side='left', padx=5)
         ttk.Button(btn_frame, text="Limpiar", command=self._pm_limpiar).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text="Verificar Período", command=self._pm_verificar_periodo).pack(side='left', padx=5)
 
         table_frame = ttk.LabelFrame(tab, text="Resultados", padding=5)
         table_frame.pack(fill='both', expand=True, pady=(10, 0))
@@ -132,6 +153,23 @@ class App:
         for item in self.pm_tree.get_children():
             self.pm_tree.delete(item)
 
+    def _pm_verificar_periodo(self):
+        try:
+            s1 = int(self.pm_semilla1.get())
+            s2 = int(self.pm_semilla2.get())
+            digitos = int(self.pm_digitos.get())
+            self._validar_positivos(s1, s2, digitos)
+            periodo = productos_medios.calcular_periodo(s1, s2, digitos)
+            if periodo is None:
+                self.pm_periodo_label.config(text="No se encontró repetición en el límite establecido", fg="#dc2626")
+            else:
+                self.pm_periodo_label.config(
+                    text=f"✓ Período: {periodo['unicos']} números únicos (ciclo de {periodo['longitud_ciclo']}, repite {periodo['valor_repetido']} en iteración {periodo['iteracion_repetida']})",
+                    fg="#2563eb"
+                )
+        except ValueError as e:
+            messagebox.showerror("Error de entrada", str(e))
+
     # ── Módulo 3: Cuadrados Medios ──
 
     def _crear_tab_cuad_medios(self, notebook):
@@ -144,11 +182,14 @@ class App:
         self.cm_semilla = self._crear_input(input_frame, "Semilla:", 0, "1234")
         self.cm_iteraciones = self._crear_input(input_frame, "Iteraciones:", 1, "10")
         self.cm_digitos = self._crear_input(input_frame, "Dígitos Centrales:", 2, "4")
+        self.cm_periodo_label = tk.Label(input_frame, text="", fg="#2563eb", bg="#f0f0f0")
+        self.cm_periodo_label.grid(row=3, column=0, columnspan=2, pady=(5, 0))
 
         btn_frame = ttk.Frame(tab)
         btn_frame.pack(fill='x', pady=5)
         ttk.Button(btn_frame, text="Generar", command=self._cm_generar).pack(side='left', padx=5)
         ttk.Button(btn_frame, text="Limpiar", command=self._cm_limpiar).pack(side='left', padx=5)
+        ttk.Button(btn_frame, text="Verificar Período", command=self._cm_verificar_periodo).pack(side='left', padx=5)
 
         table_frame = ttk.LabelFrame(tab, text="Resultados", padding=5)
         table_frame.pack(fill='both', expand=True, pady=(10, 0))
@@ -171,6 +212,22 @@ class App:
     def _cm_limpiar(self):
         for item in self.cm_tree.get_children():
             self.cm_tree.delete(item)
+
+    def _cm_verificar_periodo(self):
+        try:
+            semilla = int(self.cm_semilla.get())
+            digitos = int(self.cm_digitos.get())
+            self._validar_positivos(semilla, digitos)
+            periodo = cuadrados_medios.calcular_periodo(semilla, digitos)
+            if periodo is None:
+                self.cm_periodo_label.config(text="No se encontró repetición en el límite establecido", fg="#dc2626")
+            else:
+                self.cm_periodo_label.config(
+                    text=f"✓ Período: {periodo['unicos']} números únicos (ciclo de {periodo['longitud_ciclo']}, repite {periodo['valor_repetido']} en iteración {periodo['iteracion_repetida']})",
+                    fg="#2563eb"
+                )
+        except ValueError as e:
+            messagebox.showerror("Error de entrada", str(e))
 
 
 if __name__ == "__main__":
