@@ -3,44 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Generador de N&uacute;meros Pseudoaleatorios</title>
+<title>Calculadora de Simulaci&oacute;n</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#f5f5f5;color:#222;padding:20px}
 h1{text-align:center;margin-bottom:20px;font-size:1.4rem}
-.tabs{display:flex;gap:4px;margin-bottom:0}
-.tabs button{padding:10px 18px;border:1px solid #ccc;background:#e0e0e0;cursor:pointer;font-size:.9rem;border-radius:6px 6px 0 0;transition:.2s}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:0}
+.tabs button{padding:8px 14px;border:1px solid #ccc;background:#e0e0e0;cursor:pointer;font-size:.82rem;border-radius:6px 6px 0 0;transition:.2s}
 .tabs button.active{background:#fff;border-bottom-color:#fff;font-weight:600}
 .tab-content{display:none;background:#fff;border:1px solid #ccc;border-top:none;padding:20px;border-radius:0 6px 6px;min-height:400px}
 .tab-content.active{display:block}
-.form-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;max-width:450px;margin-bottom:8px;align-items:center}
-.form-grid label{text-align:right;font-size:.9rem}
-.form-grid input{padding:6px 10px;border:1px solid #bbb;border-radius:4px;font-size:.9rem;width:100%}
-.btn{background:#2563eb;color:#fff;border:none;padding:8px 24px;border-radius:4px;cursor:pointer;font-size:.9rem}
+.form-grid{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;max-width:520px;margin-bottom:6px;align-items:center}
+.form-grid label{text-align:right;font-size:.85rem}
+.form-grid input{padding:5px 8px;border:1px solid #bbb;border-radius:4px;font-size:.85rem;width:100%}
+.btn{background:#2563eb;color:#fff;border:none;padding:7px 20px;border-radius:4px;cursor:pointer;font-size:.85rem}
 .btn:hover{background:#1d4ed8}
 .btn.clear{background:#6b7280}
 .btn.clear:hover{background:#4b5563}
 .btn.periodo{background:#059669}
 .btn.periodo:hover{background:#047857}
-.actions{display:flex;gap:8px;margin-bottom:8px}
-.periodo-result{font-size:.85rem;margin-bottom:12px;padding:6px 10px;border-radius:4px;display:none}
+.actions{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.periodo-result{font-size:.8rem;margin-bottom:10px;padding:5px 8px;border-radius:4px;display:none}
 .periodo-result.ok{display:block;background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
 .periodo-result.err{display:block;background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th,td{padding:6px 10px;text-align:center;border:1px solid #ddd}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th,td{padding:4px 8px;text-align:center;border:1px solid #ddd}
 th{background:#f0f0f0;position:sticky;top:0}
-.table-wrap{max-height:350px;overflow-y:auto;border:1px solid #ddd;border-radius:4px}
-.error{color:#dc2626;margin-bottom:10px;font-size:.9rem;display:none}
+.table-wrap{max-height:320px;overflow-y:auto;border:1px solid #ddd;border-radius:4px}
+.error{color:#dc2626;margin-bottom:8px;font-size:.85rem;display:none}
 </style>
 </head>
 <body>
 
-<h1>Generador de N&uacute;meros Pseudoaleatorios</h1>
+<h1>Calculadora de Simulaci&oacute;n</h1>
 
 <div class="tabs">
-  <button class="active" data-tab="mc">Multiplicador Constante</button>
-  <button data-tab="pm">Productos Medios</button>
-  <button data-tab="cm">Cuadrados Medios</button>
+  <button class="active" data-tab="mc">Mult. Constante</button>
+  <button data-tab="pm">Prod. Medios</button>
+  <button data-tab="cm">Cuad. Medios</button>
+  <button data-tab="cl">Cong. Lineal</button>
+  <button data-tab="cmg">Cong. Mult.</button>
+  <button data-tab="mt">Mersenne Twister</button>
+  <button data-tab="lv">Lotka-Volterra</button>
+  <button data-tab="tests">Pruebas</button>
 </div>
 
 <!-- Multiplicador Constante -->
@@ -55,12 +60,11 @@ th{background:#f0f0f0;position:sticky;top:0}
     <button class="btn" onclick="generar('mc')">Generar</button>
     <button class="btn clear" onclick="limpiar('mc')">Limpiar</button>
     <button class="btn periodo" onclick="verificarPeriodo('mc')">Verificar Per&iacute;odo</button>
+    <button class="btn" onclick="enviarAPruebas('mc')" style="background:#7c3aed">Enviar a Pruebas</button>
   </div>
   <div id="mc-periodo" class="periodo-result"></div>
   <div id="mc-error" class="error"></div>
-  <div class="table-wrap" id="mc-table-wrap">
-    <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mc-body"></tbody></table>
-  </div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mc-body"></tbody></table></div>
 </div>
 
 <!-- Productos Medios -->
@@ -75,12 +79,11 @@ th{background:#f0f0f0;position:sticky;top:0}
     <button class="btn" onclick="generar('pm')">Generar</button>
     <button class="btn clear" onclick="limpiar('pm')">Limpiar</button>
     <button class="btn periodo" onclick="verificarPeriodo('pm')">Verificar Per&iacute;odo</button>
+    <button class="btn" onclick="enviarAPruebas('pm')" style="background:#7c3aed">Enviar a Pruebas</button>
   </div>
   <div id="pm-periodo" class="periodo-result"></div>
   <div id="pm-error" class="error"></div>
-  <div class="table-wrap" id="pm-table-wrap">
-    <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="pm-body"></tbody></table>
-  </div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="pm-body"></tbody></table></div>
 </div>
 
 <!-- Cuadrados Medios -->
@@ -94,11 +97,116 @@ th{background:#f0f0f0;position:sticky;top:0}
     <button class="btn" onclick="generar('cm')">Generar</button>
     <button class="btn clear" onclick="limpiar('cm')">Limpiar</button>
     <button class="btn periodo" onclick="verificarPeriodo('cm')">Verificar Per&iacute;odo</button>
+    <button class="btn" onclick="enviarAPruebas('cm')" style="background:#7c3aed">Enviar a Pruebas</button>
   </div>
   <div id="cm-periodo" class="periodo-result"></div>
   <div id="cm-error" class="error"></div>
-  <div class="table-wrap" id="cm-table-wrap">
-    <table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cm-body"></tbody></table>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cm-body"></tbody></table></div>
+</div>
+
+<!-- Congruencial Lineal -->
+<div id="tab-cl" class="tab-content">
+  <div class="form-grid">
+    <label>Multiplicador (a):</label> <input id="cl-a" value="1664525">
+    <label>Incremento (c):</label> <input id="cl-c" value="1013904223">
+    <label>M&oacute;dulo (m):</label> <input id="cl-m" value="4294967296">
+    <label>Semilla (X₀):</label> <input id="cl-semilla" value="12345">
+    <label>Iteraciones:</label> <input id="cl-iter" value="10">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="generar('cl')">Generar</button>
+    <button class="btn clear" onclick="limpiar('cl')">Limpiar</button>
+    <button class="btn periodo" onclick="verificarPeriodo('cl')">Verificar Per&iacute;odo</button>
+    <button class="btn" onclick="enviarAPruebas('cl')" style="background:#7c3aed">Enviar a Pruebas</button>
+  </div>
+  <div id="cl-periodo" class="periodo-result"></div>
+  <div id="cl-error" class="error"></div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cl-body"></tbody></table></div>
+</div>
+
+<!-- Congruencial Multiplicativo -->
+<div id="tab-cmg" class="tab-content">
+  <div class="form-grid">
+    <label>Multiplicador (a):</label> <input id="cmg-a" value="16807">
+    <label>M&oacute;dulo (m):</label> <input id="cmg-m" value="2147483647">
+    <label>Semilla (X₀):</label> <input id="cmg-semilla" value="12345">
+    <label>Iteraciones:</label> <input id="cmg-iter" value="10">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="generar('cmg')">Generar</button>
+    <button class="btn clear" onclick="limpiar('cmg')">Limpiar</button>
+    <button class="btn periodo" onclick="verificarPeriodo('cmg')">Verificar Per&iacute;odo</button>
+    <button class="btn" onclick="enviarAPruebas('cmg')" style="background:#7c3aed">Enviar a Pruebas</button>
+  </div>
+  <div id="cmg-periodo" class="periodo-result"></div>
+  <div id="cmg-error" class="error"></div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cmg-body"></tbody></table></div>
+</div>
+
+<!-- Mersenne Twister -->
+<div id="tab-mt" class="tab-content">
+  <div class="form-grid">
+    <label>Semilla:</label> <input id="mt-semilla" value="42">
+    <label>Iteraciones:</label> <input id="mt-iter" value="10">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="generar('mt')">Generar</button>
+    <button class="btn clear" onclick="limpiar('mt')">Limpiar</button>
+    <button class="btn periodo" onclick="verificarPeriodo('mt')">Verificar Per&iacute;odo</button>
+    <button class="btn" onclick="enviarAPruebas('mt')" style="background:#7c3aed">Enviar a Pruebas</button>
+  </div>
+  <div id="mt-periodo" class="periodo-result"></div>
+  <div id="mt-error" class="error"></div>
+  <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mt-body"></tbody></table></div>
+</div>
+
+<!-- Lotka-Volterra -->
+<div id="tab-lv" class="tab-content">
+  <div class="form-grid">
+    <label>&alpha; (tasa natalidad presa):</label> <input id="lv-alpha" value="1.5">
+    <label>&beta; (tasa depredaci&oacute;n):</label> <input id="lv-beta" value="1.0">
+    <label>&delta; (tasa crecimiento depredador):</label> <input id="lv-delta" value="3.0">
+    <label>&gamma; (tasa mortalidad depredador):</label> <input id="lv-gamma" value="1.0">
+    <label>Poblaci&oacute;n inicial presas:</label> <input id="lv-x0" value="10">
+    <label>Poblaci&oacute;n inicial depredadores:</label> <input id="lv-y0" value="5">
+    <label>Paso temporal (dt):</label> <input id="lv-dt" value="0.01">
+    <label>Iteraciones:</label> <input id="lv-iter" value="500">
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="simularLV()">Simular</button>
+    <button class="btn clear" onclick="limpiar('lv')">Limpiar</button>
+  </div>
+  <div id="lv-error" class="error"></div>
+  <div class="table-wrap"><table><thead><tr><th>t</th><th>Presas</th><th>Depredadores</th></tr></thead><tbody id="lv-body"></tbody></table></div>
+</div>
+
+<!-- Pruebas Estadisticas -->
+<div id="tab-tests" class="tab-content">
+  <div style="margin-bottom:8px">
+    <label style="font-size:.85rem;display:block;margin-bottom:4px">Ingrese n&uacute;meros separados por coma o espacio:</label>
+    <textarea id="tests-numeros" rows="4" style="width:100%;padding:8px;border:1px solid #bbb;border-radius:4px;font-family:monospace;font-size:.85rem">0.6394, 0.0250, 0.2750, 0.2232, 0.7365, 0.8762, 0.1134, 0.5489, 0.4329, 0.9671</textarea>
+  </div>
+  <div class="form-grid">
+    <label>Alpha (nivel sig.):</label> <input id="tests-alpha" value="0.05">
+    <label>Intervalos (&chi;&sup2;):</label> <input id="tests-intervalos" value="10">
+    <label>Lag (autocorrelaci&oacute;n):</label> <input id="tests-lag" value="1">
+  </div>
+  <div style="margin:6px 0;display:flex;gap:10px;flex-wrap:wrap;font-size:.85rem">
+    <label><input type="checkbox" id="tests-ck-promedio" checked> Promedio</label>
+    <label><input type="checkbox" id="tests-ck-varianza" checked> Varianza</label>
+    <label><input type="checkbox" id="tests-ck-chi2" checked> Chi-cuadrada</label>
+    <label><input type="checkbox" id="tests-ck-ks" checked> K-S</label>
+    <label><input type="checkbox" id="tests-ck-rachas" checked> Rachas</label>
+    <label><input type="checkbox" id="tests-ck-rachas-tend" checked> Rachas tendencia</label>
+    <label><input type="checkbox" id="tests-ck-autocorr" checked> Autocorrelaci&oacute;n</label>
+  </div>
+  <div class="actions">
+    <button class="btn" onclick="ejecutarPruebas()">Ejecutar Pruebas</button>
+    <button class="btn clear" onclick="limpiarPruebas()">Limpiar</button>
+  </div>
+  <div id="tests-error" class="error"></div>
+  <div class="table-wrap" style="max-height:340px;overflow-y:auto">
+    <pre id="tests-resultado" style="margin:0;padding:10px;font-family:monospace;font-size:.8rem;white-space:pre-wrap"></pre>
   </div>
 </div>
 
@@ -106,13 +214,19 @@ th{background:#f0f0f0;position:sticky;top:0}
 const ENDPOINTS = {
   mc: "/api/multiplicador_constante",
   pm: "/api/productos_medios",
-  cm: "/api/cuadrados_medios"
+  cm: "/api/cuadrados_medios",
+  cl: "/api/congruencial_lineal",
+  cmg: "/api/congruencial_multiplicativo",
+  mt: "/api/mersenne_twister"
 };
 
 const PERIOD_ENDPOINTS = {
   mc: "/api/multiplicador_constante/periodo",
   pm: "/api/productos_medios/periodo",
-  cm: "/api/cuadrados_medios/periodo"
+  cm: "/api/cuadrados_medios/periodo",
+  cl: "/api/congruencial_lineal/periodo",
+  cmg: "/api/congruencial_multiplicativo/periodo",
+  mt: "/api/mersenne_twister/periodo"
 };
 
 document.querySelectorAll(".tabs button").forEach(b => {
@@ -125,27 +239,41 @@ document.querySelectorAll(".tabs button").forEach(b => {
 });
 
 function obtenerBody(modo) {
-  if (modo === "mc") {
-    return {
-      constante_a: document.getElementById("mc-constante").value,
-      valor_inicial: document.getElementById("mc-x0").value,
-      iteraciones: document.getElementById("mc-iter").value,
-      digitos: document.getElementById("mc-digitos").value
-    };
-  } else if (modo === "pm") {
-    return {
-      semilla1: document.getElementById("pm-semilla1").value,
-      semilla2: document.getElementById("pm-semilla2").value,
-      iteraciones: document.getElementById("pm-iter").value,
-      digitos: document.getElementById("pm-digitos").value
-    };
-  } else {
-    return {
-      semilla: document.getElementById("cm-semilla").value,
-      iteraciones: document.getElementById("cm-iter").value,
-      digitos: document.getElementById("cm-digitos").value
-    };
-  }
+  if (modo === "mc") return {
+    constante_a: document.getElementById("mc-constante").value,
+    valor_inicial: document.getElementById("mc-x0").value,
+    iteraciones: document.getElementById("mc-iter").value,
+    digitos: document.getElementById("mc-digitos").value
+  };
+  if (modo === "pm") return {
+    semilla1: document.getElementById("pm-semilla1").value,
+    semilla2: document.getElementById("pm-semilla2").value,
+    iteraciones: document.getElementById("pm-iter").value,
+    digitos: document.getElementById("pm-digitos").value
+  };
+  if (modo === "cm") return {
+    semilla: document.getElementById("cm-semilla").value,
+    iteraciones: document.getElementById("cm-iter").value,
+    digitos: document.getElementById("cm-digitos").value
+  };
+  if (modo === "cl") return {
+    a: document.getElementById("cl-a").value,
+    c: document.getElementById("cl-c").value,
+    m: document.getElementById("cl-m").value,
+    semilla: document.getElementById("cl-semilla").value,
+    iteraciones: document.getElementById("cl-iter").value
+  };
+  if (modo === "cmg") return {
+    a: document.getElementById("cmg-a").value,
+    m: document.getElementById("cmg-m").value,
+    semilla: document.getElementById("cmg-semilla").value,
+    iteraciones: document.getElementById("cmg-iter").value
+  };
+  if (modo === "mt") return {
+    semilla: document.getElementById("mt-semilla").value,
+    iteraciones: document.getElementById("mt-iter").value
+  };
+  return {};
 }
 
 function generar(modo) {
@@ -165,12 +293,13 @@ function generar(modo) {
     tbody.innerHTML = "";
     data.forEach(d => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td>${d.iteracion}</td><td>${d.xn}</td><td>${d.ri.toFixed(parseInt(body.digitos) || 4)}</td>`;
+      const ri = typeof d.ri === "number" ? d.ri.toFixed(6) : d.ri;
+      tr.innerHTML = `<td>${d.iteracion}</td><td>${d.xn}</td><td>${ri}</td>`;
       tbody.appendChild(tr);
     });
   })
   .catch(e => {
-    errEl.textContent = "Error de conexi&oacute;n";
+    errEl.textContent = "Error de conexi\u00f3n";
     errEl.style.display = "block";
   });
 }
@@ -183,6 +312,7 @@ function verificarPeriodo(modo) {
 
   const body = obtenerBody(modo);
   delete body.iteraciones;
+  delete body.digitos;
 
   fetch(PERIOD_ENDPOINTS[modo], {
     method: "POST",
@@ -197,10 +327,12 @@ function verificarPeriodo(modo) {
       return;
     }
     if (data.unicos !== undefined) {
+      let txt = `Per\u00edodo: ${data.unicos} n\u00fameros \u00fanicos (ciclo de ${data.longitud_ciclo}`;
+      if (data.valor_repetido !== undefined) txt += `, repite ${data.valor_repetido} en iteraci\u00f3n ${data.iteracion_repetida}`;
+      txt += `)`;
+      if (data.periodo_completo) txt += " \u2014 \u00a1PER\u00cdODO COMPLETO!";
       periodoEl.className = "periodo-result ok";
-      periodoEl.textContent =
-        `Per\u00edodo: ${data.unicos} n\u00fameros \u00fanicos ` +
-        `(ciclo de ${data.longitud_ciclo}, repite ${data.valor_repetido} en iteraci\u00f3n ${data.iteracion_repetida})`;
+      periodoEl.textContent = txt;
     } else {
       periodoEl.className = "periodo-result err";
       periodoEl.textContent = "No se encontr\u00f3 repetici\u00f3n en el l\u00edmite establecido";
@@ -216,8 +348,136 @@ function limpiar(modo) {
   document.getElementById(modo + "-body").innerHTML = "";
   document.getElementById(modo + "-error").style.display = "none";
   const periodoEl = document.getElementById(modo + "-periodo");
-  periodoEl.className = "periodo-result";
-  periodoEl.style.display = "none";
+  if (periodoEl) { periodoEl.className = "periodo-result"; periodoEl.style.display = "none"; }
+}
+
+function simularLV() {
+  const errEl = document.getElementById("lv-error");
+  errEl.style.display = "none";
+  const body = {
+    alpha: document.getElementById("lv-alpha").value,
+    beta: document.getElementById("lv-beta").value,
+    delta: document.getElementById("lv-delta").value,
+    gamma: document.getElementById("lv-gamma").value,
+    x0: document.getElementById("lv-x0").value,
+    y0: document.getElementById("lv-y0").value,
+    dt: document.getElementById("lv-dt").value,
+    iteraciones: document.getElementById("lv-iter").value
+  };
+
+  fetch("/api/lotka_volterra", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = "block"; return; }
+    const tbody = document.getElementById("lv-body");
+    tbody.innerHTML = "";
+    const paso = Math.max(1, Math.floor(data.length / 50));
+    data.forEach((d, i) => {
+      if (i % paso === 0 || i === data.length - 1) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${d.t || d.iteracion}</td><td>${d.presas || d.xn}</td><td>${d.depredadores || d.ri}</td>`;
+        tbody.appendChild(tr);
+      }
+    });
+  })
+  .catch(e => {
+    errEl.textContent = "Error de conexi\u00f3n";
+    errEl.style.display = "block";
+  });
+}
+
+function obtenerTests() {
+  const tests = [];
+  if (document.getElementById("tests-ck-promedio").checked) tests.push("promedio");
+  if (document.getElementById("tests-ck-varianza").checked) tests.push("varianza");
+  if (document.getElementById("tests-ck-chi2").checked) tests.push("chi2");
+  if (document.getElementById("tests-ck-ks").checked) tests.push("ks");
+  if (document.getElementById("tests-ck-rachas").checked) tests.push("rachas");
+  if (document.getElementById("tests-ck-rachas-tend").checked) tests.push("rachas_tendencia");
+  if (document.getElementById("tests-ck-autocorr").checked) tests.push("autocorr");
+  return tests;
+}
+
+function ejecutarPruebas() {
+  const errEl = document.getElementById("tests-error");
+  const resultadoEl = document.getElementById("tests-resultado");
+  errEl.style.display = "none";
+  resultadoEl.textContent = "Ejecutando...";
+
+  const body = {
+    numeros: document.getElementById("tests-numeros").value,
+    alpha: parseFloat(document.getElementById("tests-alpha").value) || 0.05,
+    intervalos: parseInt(document.getElementById("tests-intervalos").value) || 10,
+    lag: parseInt(document.getElementById("tests-lag").value) || 1,
+    tests: obtenerTests()
+  };
+
+  if (body.tests.length === 0) {
+    errEl.textContent = "Seleccione al menos una prueba";
+    errEl.style.display = "block";
+    return;
+  }
+
+  fetch("/api/pruebas_estadisticas", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = "block"; return; }
+    let salida = "";
+    data.forEach(r => {
+      salida += "\u25b8 " + r.prueba + "\n";
+      salida += "  Estad\u00edstico: " + r.estadistico + "\n";
+      salida += "  Valor calculado: " + (r.valor_calculado !== undefined ? r.valor_calculado.toFixed(6) : "N/A") + "\n";
+      if (r.valor_critico !== undefined) salida += "  Valor cr\u00edtico: " + r.valor_critico.toFixed(6) + "\n";
+      if (r.valor_critico_inferior !== undefined) salida += "  Valor cr\u00edtico inf: " + r.valor_critico_inferior.toFixed(6) + "\n";
+      if (r.valor_critico_superior !== undefined) salida += "  Valor cr\u00edtico sup: " + r.valor_critico_superior.toFixed(6) + "\n";
+      if (r.limite_inferior !== undefined && r.limite_superior !== undefined) {
+        salida += "  L\u00edmite inferior: " + r.limite_inferior.toFixed(6) + "\n";
+        salida += "  L\u00edmite superior: " + r.limite_superior.toFixed(6) + "\n";
+      }
+      if (r.media !== undefined) salida += "  Media muestral: " + r.media.toFixed(6) + "\n";
+      if (r.varianza_muestral !== undefined) salida += "  Varianza muestral: " + r.varianza_muestral.toFixed(6) + "\n";
+      if (r.intervalos !== undefined) salida += "  Intervalos: " + r.intervalos + ",  gl: " + r.grados_libertad + "\n";
+      if (r.frecuencias !== undefined) salida += "  Frecuencias: [" + r.frecuencias.join(", ") + "]\n";
+      if (r.runs !== undefined) salida += "  Rachas: " + r.runs + " (esperadas: " + (r.media_runs !== undefined ? r.media_runs.toFixed(2) : "N/A") + ")\n";
+      if (r.autocorrelacion !== undefined) salida += "  Autocorr: " + r.autocorrelacion.toFixed(6) + " (lag=" + r.lag + ")\n";
+      salida += "  \u00bfAcepta H0?: " + (r.acepta_H0 ? "S\u00cd \u2713" : "NO \u2717") + "\n";
+      salida += "  \u2192 " + r.interpretacion + "\n\n";
+    });
+    resultadoEl.textContent = salida;
+  })
+  .catch(e => {
+    errEl.textContent = "Error de conexi\u00f3n";
+    errEl.style.display = "block";
+  });
+}
+
+function limpiarPruebas() {
+  document.getElementById("tests-resultado").textContent = "";
+  document.getElementById("tests-error").style.display = "none";
+}
+
+function enviarAPruebas(modo) {
+  const tbody = document.getElementById(modo + "-body");
+  const rows = tbody.querySelectorAll("tr");
+  const ris = [];
+  rows.forEach(tr => {
+    const td = tr.querySelectorAll("td");
+    if (td.length >= 3) ris.push(td[2].textContent.trim());
+  });
+  if (ris.length === 0) return;
+  document.getElementById("tests-numeros").value = ris.join(", ");
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(x => x.classList.remove("active"));
+  document.querySelector('[data-tab="tests"]').classList.add("active");
+  document.getElementById("tab-tests").classList.add("active");
 }
 </script>
 </body>
