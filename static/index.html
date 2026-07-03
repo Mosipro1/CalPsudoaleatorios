@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Calculadora de Simulación</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
 <style>
 :root {
   --bg: #f1f5f9;
@@ -164,6 +166,38 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
 .btn-ghost{background:var(--surface-hover);color:var(--text-secondary);border:1.5px solid var(--border)}
 .btn-ghost:hover{background:var(--border);color:var(--text)}
 
+/* ── Music Player ── */
+.music-bar{
+  position:fixed; bottom:0; left:0; right:0; z-index:9999;
+  background:linear-gradient(135deg,#1e1b4b,#312e81); color:#e0e7ff;
+  display:flex; align-items:center; gap:10px; padding:8px 16px;
+  font-size:.8rem; border-top:1px solid rgba(255,255,255,.1);
+  backdrop-filter:blur(8px);
+}
+.music-bar .mb-btn{
+  background:none; border:1px solid rgba(255,255,255,.3); border-radius:50%;
+  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:#e0e7ff; flex-shrink:0; transition:.15s;
+}
+.music-bar .mb-btn:hover{background:rgba(255,255,255,.15)}
+.music-bar .mb-btn svg{width:16px;height:16px;fill:currentColor}
+.music-bar .mb-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.music-bar .mb-vol{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.music-bar .mb-vol svg{width:14px;height:14px;fill:currentColor;opacity:.6}
+.music-bar .mb-vol input[type=range]{
+  width:70px; height:4px; -webkit-appearance:none; appearance:none;
+  background:rgba(255,255,255,.25); border-radius:2px; outline:none;
+}
+.music-bar .mb-vol input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:12px; height:12px; border-radius:50%;
+  background:#818cf8; cursor:pointer;
+}
+.music-bar .mb-vol input[type=range]::-moz-range-thumb{
+  width:12px; height:12px; border-radius:50%; background:#818cf8; cursor:pointer; border:none;
+}
+body{padding-bottom:52px}
+
+
 /* ── Table ── */
 .table-wrap{
   max-height:350px; overflow-y:auto; border:1px solid var(--border);
@@ -263,6 +297,54 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
   .header-icon svg{width:18px;height:18px}
   .test-card .test-row{flex-direction:column;gap:2px}
 }
+.chip-btn{
+  width:38px;height:38px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);
+  color:#fff;font-weight:700;font-size:.8rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);box-shadow:0 2px 6px rgba(0,0,0,0.3);
+}
+.chip-btn:hover{transform:scale(1.12);border-color:#fff}
+.chip-btn.active-chip{border-color:#f1c40f;box-shadow:0 0 0 3px rgba(241,196,15,0.4),0 2px 8px rgba(0,0,0,0.4);transform:scale(1.08)}
+.num-btn{
+  width:36px;height:30px;border:none;border-radius:3px;margin:1px;
+  font-size:.75rem;font-weight:600;color:#fff;cursor:pointer;
+  transition:var(--transition);position:relative;
+}
+.num-btn:hover{transform:scale(1.1);opacity:0.9;z-index:2}
+.num-btn.zero{width:60px;height:36px;font-size:.85rem;margin-bottom:4px}
+.num-btn.has-chip{box-shadow:0 0 0 2px #f1c40f,0 0 8px rgba(241,196,15,0.5)}
+.num-btn .chip-marker{
+  position:absolute;top:-4px;right:-4px;width:14px;height:14px;border-radius:50%;
+  border:2px solid #f1c40f;font-size:7px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;
+}
+#roul-number-grid{display:inline-grid;grid-template-columns:repeat(12,36px);gap:1px;justify-content:center}
+.roul-result-overlay{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:100px;height:100px;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;z-index:10;
+  animation:roulPop .5s cubic-bezier(.17,.67,.83,.67);pointer-events:none;
+}
+.roul-result-overlay .big-num{font-size:2.2rem;font-weight:900;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.5);line-height:1}
+.roul-result-overlay .big-label{font-size:.7rem;color:rgba(255,255,255,0.85);text-transform:uppercase;letter-spacing:1px}
+.roul-result-overlay .big-payout{font-size:.85rem;color:#f1c40f;font-weight:700;margin-top:2px}
+@keyframes roulPop{0%{transform:translate(-50%,-50%) scale(0);opacity:0}60%{transform:translate(-50%,-50%) scale(1.15)}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.roul-hist-grid{display:flex;gap:4px;flex-wrap:wrap}
+.roul-hist-dot{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;color:#fff;border:2px solid rgba(255,255,255,0.2);
+  animation:roulPop .3s ease-out;
+}
+.stat-row{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.75rem}
+.stat-bar-bg{flex:1;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.balance-bar-wrap{height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;margin-top:4px}
+.balance-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.wheel-wrap{position:relative;display:inline-block}
+.chip-stack{position:absolute;width:18px;height:18px;border-radius:50%;border:2px solid #f1c40f;pointer-events:none;z-index:5;animation:chipDrop .3s ease-out;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:700}
+@keyframes chipDrop{0%{transform:scale(0) translateY(-20px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+.roul-apuestas-list{font-size:.75rem;color:var(--text-secondary);max-height:80px;overflow-y:auto}
+.roul-apuestas-list .apuesta-item{padding:2px 0;border-bottom:1px solid var(--border)}
 </style>
 </head>
 <body>
@@ -294,6 +376,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <button data-tab="mt">Mersenne Twister</button>
     <button data-tab="lv">Lotka-Volterra</button>
     <button data-tab="tests">Pruebas</button>
+    <button data-tab="roulette">Ruleta</button>
+    <button data-tab="covid">Simulación Covid</button>
+    <button data-tab="dolares">Dólares</button>
+    <button data-tab="quinua">Quinua</button>
   </div>
 
   <!-- Multiplicador Constante -->
@@ -318,6 +404,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mc-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="mc-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="mc-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -343,6 +433,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="pm-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="pm-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="pm-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -367,6 +461,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cm-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="cm-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="cm-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -393,6 +491,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cl-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="cl-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="cl-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -418,6 +520,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="cmg-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="cmg-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="cmg-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -441,6 +547,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>#</th><th>Xn</th><th>ri</th></tr></thead><tbody id="mt-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="mt-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="mt-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -467,6 +577,10 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div class="card">
       <div class="card-title">Resultados</div>
       <div class="table-wrap"><table><thead><tr><th>t</th><th>Presas</th><th>Depredadores</th></tr></thead><tbody id="lv-body"></tbody></table></div>
+      <div class="chart-container" style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:250px"><canvas id="lv-chart-serie"></canvas></div>
+        <div style="flex:1;min-width:250px"><canvas id="lv-chart-hist"></canvas></div>
+      </div>
     </div>
   </div>
 
@@ -506,6 +620,277 @@ textarea:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(99,102
     <div id="tests-error" class="error"></div>
     <div id="tests-resultado"></div>
   </div>
+
+  <!-- Dólares -->
+  <div id="tab-dolares" class="tab-content">
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:2;min-width:400px">
+        <div class="card">
+          <div class="card-title">Evolución temporal</div>
+          <canvas id="dl-evo" style="width:100%;height:260px"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">Espacio de fases</div>
+          <canvas id="dl-fase" style="width:100%;height:260px"></canvas>
+        </div>
+      </div>
+      <div style="flex:1;min-width:300px">
+        <div class="card">
+          <div class="card-title">Parámetros del modelo</div>
+          <div class="form-grid">
+            <label>α — entrada de dólares:</label>
+            <input type="number" id="dl-alpha" min="0.01" max="1.0" step="0.01" value="0.25">
+            <label>β — presión sobre dólares:</label>
+            <input type="number" id="dl-beta" min="0.01" max="0.5" step="0.01" value="0.08">
+            <label>δ — crecimiento de presión:</label>
+            <input type="number" id="dl-delta" min="0.01" max="0.3" step="0.01" value="0.04">
+            <label>γ — estabilización:</label>
+            <input type="number" id="dl-gamma" min="0.01" max="1.0" step="0.01" value="0.30">
+            <label>Disponibilidad inicial ($):</label>
+            <input type="number" id="dl-x0" min="1" max="30" step="1" value="10">
+            <label>Presión inicial:</label>
+            <input type="number" id="dl-y0" min="1" max="30" step="1" value="4">
+            <label>Tiempo a simular:</label>
+            <input type="number" id="dl-tiempo" min="20" max="150" step="5" value="60">
+          </div>
+        </div>
+        <div class="actions" style="margin-bottom:8px">
+          <button class="btn btn-primary" onclick="dolaresIniciar()" id="dl-btn-iniciar">▶ Iniciar</button>
+          <button class="btn btn-ghost" onclick="dolaresPausar()" id="dl-btn-pausa" disabled>⏸ Pausar</button>
+          <button class="btn btn-ghost" onclick="dolaresPaso()" id="dl-btn-paso" disabled>⏭ Paso</button>
+          <button class="btn btn-ghost" onclick="dolaresReiniciar()">↺ Reiniciar</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Información</div>
+          <div id="dl-info" style="font-size:.82rem">
+            <div style="margin:4px 0"><strong>Paso:</strong> <span id="dl-paso">0 / 0</span></div>
+            <div style="margin:4px 0;color:#d97706"><strong>💵 Dólares:</strong> <span id="dl-dolares">—</span></div>
+            <div style="margin:4px 0;color:#dc2626"><strong>⚠ Presión:</strong> <span id="dl-presion">—</span></div>
+            <div style="margin:4px 0;color:#059669"><strong>⚖ Equilibrio:</strong> <span id="dl-equilibrio">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="dl-error" class="error"></div>
+  </div>
+
+  <!-- Quinua -->
+  <div id="tab-quinua" class="tab-content">
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:2;min-width:400px">
+        <div class="card">
+          <div class="card-title">Evolución temporal</div>
+          <canvas id="qn-evo" style="width:100%;height:260px"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">Espacio de fases</div>
+          <canvas id="qn-fase" style="width:100%;height:260px"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">Resultados numéricos</div>
+          <div class="table-wrap"><table><thead><tr><th>t (días)</th><th>Stock (kg)</th><th>Procesamiento (kg/día)</th></tr></thead><tbody id="qn-body"></tbody></table></div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:300px">
+        <div class="card">
+          <div class="card-title">Parámetros de la planta</div>
+          <div class="form-grid">
+            <label>α — llegada de quinua:</label>
+            <input type="number" id="qn-alpha" min="0.01" max="1.0" step="0.01" value="0.50">
+            <label>β — consumo por procesamiento:</label>
+            <input type="number" id="qn-beta" min="0.01" max="0.5" step="0.01" value="0.02">
+            <label>δ — conversión stock→producción:</label>
+            <input type="number" id="qn-delta" min="0.001" max="0.3" step="0.001" value="0.010">
+            <label>γ — reducción (mantenimiento/fallas):</label>
+            <input type="number" id="qn-gamma" min="0.01" max="1.0" step="0.01" value="0.30">
+            <label>Stock inicial (kg):</label>
+            <input type="number" id="qn-x0" min="1" max="500" step="1" value="100">
+            <label>Procesamiento inicial (kg/día):</label>
+            <input type="number" id="qn-y0" min="1" max="200" step="1" value="30">
+            <label>Tiempo (días):</label>
+            <input type="number" id="qn-tiempo" min="20" max="200" step="5" value="100">
+          </div>
+        </div>
+        <div class="actions" style="margin-bottom:8px">
+          <button class="btn btn-primary" onclick="quinuaIniciar()" id="qn-btn-iniciar">▶ Iniciar</button>
+          <button class="btn btn-ghost" onclick="quinuaPausar()" id="qn-btn-pausa" disabled>⏸ Pausar</button>
+          <button class="btn btn-ghost" onclick="quinuaPaso()" id="qn-btn-paso" disabled>⏭ Paso</button>
+          <button class="btn btn-ghost" onclick="quinuaReiniciar()">↺ Reiniciar</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Información</div>
+          <div id="qn-info" style="font-size:.82rem">
+            <div style="margin:4px 0"><strong>Paso:</strong> <span id="qn-paso">0 / 0</span></div>
+            <div style="margin:4px 0;color:#16a34a"><strong>🌾 Stock:</strong> <span id="qn-stock">— kg</span></div>
+            <div style="margin:4px 0;color:#2563eb"><strong>🏭 Procesamiento:</strong> <span id="qn-proceso">— kg/día</span></div>
+            <div style="margin:4px 0;color:#7c3aed"><strong>⚖ Equilibrio:</strong> <span id="qn-equilibrio">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="qn-error" class="error"></div>
+  </div>
+
+  <!-- Ruleta -->
+  <div id="tab-roulette" class="tab-content">
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:1;min-width:320px">
+        <div class="card">
+          <div class="card-title">Fichas</div>
+          <div id="roulette-chips" style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="chip-btn" data-val="1" style="background:#95a5a6" onclick="roulSelectChip(1)">1</button>
+            <button class="chip-btn" data-val="5" style="background:#e74c3c" onclick="roulSelectChip(5)">5</button>
+            <button class="chip-btn active-chip" data-val="10" style="background:#3498db" onclick="roulSelectChip(10)">10</button>
+            <button class="chip-btn" data-val="25" style="background:#2ecc71" onclick="roulSelectChip(25)">25</button>
+            <button class="chip-btn" data-val="100" style="background:#2c3e50" onclick="roulSelectChip(100)">100</button>
+            <button class="chip-btn" data-val="500" style="background:#9b59b6" onclick="roulSelectChip(500)">500</button>
+          </div>
+          <div style="font-size:.82rem;margin-top:6px;color:var(--text-secondary)">Ficha: <span id="roul-chip-label">10</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Mesa de apuestas</div>
+          <div id="roulette-table" style="text-align:center">
+            <button class="num-btn zero" style="background:#27ae60;color:#fff" onclick="roulBetNumber(0)">0</button>
+            <div id="roul-number-grid"></div>
+            <div id="roul-col-bets" style="display:flex;margin-top:4px"></div>
+            <div id="roul-ext-bets" style="display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;justify-content:center"></div>
+            <div id="roul-dozen-bets" style="display:flex;gap:4px;margin-top:4px;justify-content:center"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="roulSpin()" id="roul-spin-btn"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>GIRAR</button>
+          <button class="btn btn-ghost" onclick="roulClear()">Limpiar</button>
+          <button class="btn btn-ghost" onclick="roulUndo()">Deshacer</button>
+        </div>
+        <div class="roul-apuestas-list" id="roul-apuestas-list" style="margin-bottom:8px;font-size:.78rem;color:var(--text-secondary);min-height:20px"></div>
+      </div>
+      <div style="flex:1;min-width:320px">
+        <div class="card" style="position:relative">
+          <div class="card-title">Ruleta</div>
+          <div class="wheel-wrap">
+            <canvas id="roulette-wheel" width="320" height="320" style="display:block;margin:0 auto;border-radius:50%;background:#1a1a2e"></canvas>
+            <div id="roul-result-overlay" class="roul-result-overlay" style="display:none"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Información</div>
+          <div id="roul-info">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <span style="font-size:1.1rem;font-weight:700;color:#2ecc71">Saldo: <span id="roul-saldo">10000</span></span>
+              <span style="font-size:.78rem;color:var(--text-secondary)">Total apuesta: <span id="roul-total-apostado">0</span></span>
+            </div>
+            <div class="balance-bar-wrap"><div class="balance-bar-fill" id="roul-balance-bar" style="width:100%;background:linear-gradient(90deg,#2ecc71,#27ae60)"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-secondary);margin-top:4px">
+              <span>Apuestas: <span id="roul-apuestas-count">0</span></span>
+              <span>Giros: <span id="roul-giros-count">0</span></span>
+            </div>
+            <div style="font-size:.95rem;font-weight:600;margin-top:6px;padding:8px;border-radius:6px;text-align:center;transition:all .3s" id="roul-ultimo">🔄 Coloca tus apuestas y gira</div>
+            <div style="font-size:.82rem;text-align:center;margin-top:4px" id="roul-ganancia"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between">
+            <span>Historial</span>
+            <span id="roul-hist-counter" style="font-size:.72rem;color:var(--text-tertiary)">0</span>
+          </div>
+          <div id="roul-historial" class="roul-hist-grid" style="min-height:34px"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Estadísticas</div>
+          <div id="roul-stats" style="min-height:80px;color:var(--text-secondary)">
+            <div style="text-align:center;padding:12px;font-size:.82rem;color:var(--text-tertiary)">Sin datos — juega algunos giros</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="roul-error" class="error" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Simulación Covid -->
+  <div id="tab-covid" class="tab-content">
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="flex:2;min-width:400px">
+        <div class="card">
+          <div class="card-title">Simulación</div>
+          <div id="covid-grid-wrap" style="overflow:auto;max-height:620px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface)">
+            <canvas id="covid-canvas"></canvas>
+          </div>
+          <div id="covid-legend" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:.8rem;justify-content:center;font-weight:500">
+            <span><span style="display:inline-block;width:14px;height:14px;background:#2563eb;border-radius:3px;vertical-align:middle"></span> Sano</span>
+            <span><span style="display:inline-block;width:14px;height:14px;background:#b91c1c;border-radius:3px;vertical-align:middle"></span> Infectado</span>
+            <span><span style="display:inline-block;width:14px;height:14px;background:#16a34a;border-radius:3px;vertical-align:middle"></span> Recuperado</span>
+            <span><span style="display:inline-block;width:14px;height:14px;background:#0f172a;border-radius:3px;vertical-align:middle"></span> Fallecido</span>
+            <span><span style="display:inline-block;width:14px;height:14px;background:#e2e8f0;border:1px solid #94a3b8;border-radius:3px;vertical-align:middle"></span> Vacío</span>
+          </div>
+          <div id="covid-error" class="error"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Evolución</div>
+          <canvas id="covid-evolucion" style="width:100%;height:220px"></canvas>
+        </div>
+      </div>
+      <div style="flex:1;min-width:300px">
+        <div class="card">
+          <div class="card-title">Parámetros</div>
+          <div class="form-grid">
+            <label>Filas:</label> <input id="covid-filas" value="50">
+            <label>Columnas:</label> <input id="covid-columnas" value="50">
+            <label>Densidad población:</label> <input id="covid-densidad" value="0.85">
+            <label>Infectados iniciales:</label> <input id="covid-infectados" value="5">
+            <label>Prob. contagio:</label> <input id="covid-contagio" value="0.30">
+            <label>Días recuperación:</label> <input id="covid-recuperacion" value="14">
+            <label>Prob. muerte:</label> <input id="covid-muerte" value="0.02">
+            <label>Iteraciones:</label> <input id="covid-iter" value="100">
+            <label>Velocidad (ms):</label> <input id="covid-velocidad" value="100">
+          </div>
+        </div>
+        <div class="actions" style="margin-bottom:8px">
+          <button class="btn btn-primary" onclick="covidIniciar()" id="covid-btn-iniciar">▶ Iniciar</button>
+          <button class="btn btn-ghost" onclick="covidPausar()" id="covid-btn-pausa" disabled>⏸ Pausar</button>
+          <button class="btn btn-ghost" onclick="covidPaso()" id="covid-btn-paso" disabled>⏭ Paso</button>
+          <button class="btn btn-ghost" onclick="covidReiniciar()">↺ Reiniciar</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="display:flex;justify-content:space-between">
+            <span>Población</span>
+            <span id="covid-iteracion" style="font-weight:600">Iteración: 0</span>
+          </div>
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-tertiary);margin-bottom:2px">
+              <span id="covid-progress-label">Progreso: 0%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+              <div id="covid-progress-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#4f46e5,#7c3aed);border-radius:3px;transition:width .2s ease"></div>
+            </div>
+          </div>
+          <div id="covid-info" style="font-size:.82rem">
+            <div class="stat-row"><span style="width:55px"><span style="color:#2563eb">🟦</span> Sanos</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="covid-bar-sanos" style="width:0%;background:#2563eb"></div></div><span style="width:85px;text-align:right" id="covid-sanos">0 (0%)</span></div>
+            <div class="stat-row"><span style="width:55px"><span style="color:#b91c1c">🟥</span> Infectados</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="covid-bar-infectados" style="width:0%;background:#b91c1c"></div></div><span style="width:85px;text-align:right" id="covid-infectados-count">0 (0%)</span></div>
+            <div class="stat-row"><span style="width:55px"><span style="color:#16a34a">🟩</span> Recuperados</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="covid-bar-recuperados" style="width:0%;background:#16a34a"></div></div><span style="width:85px;text-align:right" id="covid-recuperados">0 (0%)</span></div>
+            <div class="stat-row"><span style="width:55px"><span style="color:#0f172a">⬛</span> Fallecidos</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="covid-bar-fallecidos" style="width:0%;background:#0f172a"></div></div><span style="width:85px;text-align:right" id="covid-fallecidos">0 (0%)</span></div>
+            <div class="stat-row"><span style="width:55px"><span style="color:#94a3b8">⬜</span> Vacío</span><div class="stat-bar-bg"><div class="stat-bar-fill" id="covid-bar-vacio" style="width:0%;background:#94a3b8"></div></div><span style="width:85px;text-align:right" id="covid-vacio">0 (0%)</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Resumen</div>
+          <div style="font-size:.82rem">
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
+              <span style="color:var(--text-secondary)">Peak infección</span>
+              <span id="covid-peak" style="font-weight:600">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)">
+              <span style="color:var(--text-secondary)">Recuperados</span>
+              <span id="covid-total-rec" style="font-weight:600;color:#22c55e">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0">
+              <span style="color:var(--text-secondary)">Tasa mortalidad</span>
+              <span id="covid-tasa-mort" style="font-weight:600;color:#ef4444">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -526,6 +911,139 @@ const PERIOD_ENDPOINTS = {
   cmg: "/api/congruencial_multiplicativo/periodo",
   mt: "/api/mersenne_twister/periodo"
 };
+
+const NOMBRES = {
+  mc: "Mult. Constante",
+  pm: "Productos Medios",
+  cm: "Cuadrados Medios",
+  cl: "Cong. Lineal",
+  cmg: "Cong. Multiplicativo",
+  mt: "Mersenne Twister",
+  lv: "Lotka-Volterra"
+};
+
+const charts = {};
+
+function destruirGraficos(modo) {
+  if (charts[modo + "-serie"]) { charts[modo + "-serie"].destroy(); delete charts[modo + "-serie"]; }
+  if (charts[modo + "-hist"]) { charts[modo + "-hist"].destroy(); delete charts[modo + "-hist"]; }
+}
+
+function crearGraficos(modo, data) {
+  destruirGraficos(modo);
+  if (!data || data.length === 0) return;
+  const titulo = NOMBRES[modo] || modo;
+  const ris = data.map(d => d.ri);
+  const iteraciones = data.map(d => d.iteracion);
+
+  // Serie de barras
+  const serieCtx = document.getElementById(modo + "-chart-serie");
+  if (!serieCtx) return;
+  charts[modo + "-serie"] = new Chart(serieCtx.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: iteraciones,
+      datasets: [{
+        label: "ri",
+        data: ris,
+        backgroundColor: "#4f46e5",
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: "Serie de ri — " + titulo } },
+      scales: {
+        x: { title: { display: true, text: "Iteración" } },
+        y: { title: { display: true, text: "ri" }, min: 0, max: 1 }
+      }
+    }
+  });
+
+  // Histograma
+  const bins = 10;
+  const histData = Array(bins).fill(0);
+  ris.forEach(r => {
+    const idx = Math.min(Math.floor(r * bins), bins - 1);
+    histData[idx]++;
+  });
+  const histLabels = Array.from({length: bins}, (_, i) => (i / bins).toFixed(1) + "-" + ((i + 1) / bins).toFixed(1));
+
+  const histCtx = document.getElementById(modo + "-chart-hist");
+  if (!histCtx) return;
+  charts[modo + "-hist"] = new Chart(histCtx.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: histLabels,
+      datasets: [{
+        label: "Frecuencia",
+        data: histData,
+        backgroundColor: "#7c3aed",
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: "Histograma — " + titulo } },
+      scales: {
+        x: { title: { display: true, text: "ri" } },
+        y: { title: { display: true, text: "Frecuencia" }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function crearGraficosLV(data) {
+  destruirGraficos("lv");
+  if (!data || data.length === 0) return;
+  const tiempos = data.map(d => d.t || d.iteracion);
+  const presas = data.map(d => d.presas || d.xn);
+  const depredadores = data.map(d => d.depredadores || d.ri);
+
+  const serieCtx = document.getElementById("lv-chart-serie");
+  if (!serieCtx) return;
+  charts["lv-serie"] = new Chart(serieCtx.getContext("2d"), {
+    type: "line",
+    data: {
+      labels: tiempos,
+      datasets: [
+        { label: "Presas", data: presas, borderColor: "#059669", backgroundColor: "rgba(5,150,105,0.1)", fill: true, tension: 0.3, pointRadius: 0 },
+        { label: "Depredadores", data: depredadores, borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.1)", fill: true, tension: 0.3, pointRadius: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: "Lotka-Volterra — Poblaciones" } },
+      scales: {
+        x: { title: { display: true, text: "Tiempo" } },
+        y: { title: { display: true, text: "Población" } }
+      }
+    }
+  });
+
+  const histCtx = document.getElementById("lv-chart-hist");
+  if (!histCtx) return;
+  charts["lv-hist"] = new Chart(histCtx.getContext("2d"), {
+    type: "scatter",
+    data: {
+      datasets: [{
+        label: "Espacio de fases",
+        data: presas.map((p, i) => ({ x: p, y: depredadores[i] })),
+        backgroundColor: "#7c3aed",
+        pointRadius: 2,
+        pointOpacity: 0.6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { title: { display: true, text: "Espacio de fases — Presas vs Depredadores" } },
+      scales: {
+        x: { title: { display: true, text: "Presas" } },
+        y: { title: { display: true, text: "Depredadores" } }
+      }
+    }
+  });
+}
 
 // ── Dark Mode ──
 (function(){
@@ -622,6 +1140,7 @@ function generar(modo) {
       tr.innerHTML = `<td>${d.iteracion}</td><td>${d.xn}</td><td>${ri}</td>`;
       tbody.appendChild(tr);
     });
+    crearGraficos(modo, data);
   })
   .catch(() => {
     errEl.textContent = "Error de conexión";
@@ -636,7 +1155,6 @@ function verificarPeriodo(modo) {
   errEl.style.display = "none";
   const body = obtenerBody(modo);
   delete body.iteraciones;
-  delete body.digitos;
   fetch(PERIOD_ENDPOINTS[modo], {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -650,9 +1168,10 @@ function verificarPeriodo(modo) {
       return;
     }
     if (data.unicos !== undefined) {
-      let txt = `Período: ${data.unicos} números únicos (ciclo de ${data.longitud_ciclo}`;
+      let txt = `Período: ${data.unicos.toLocaleString()} números únicos (ciclo de ${data.longitud_ciclo.toLocaleString()}`;
       if (data.valor_repetido !== undefined) txt += `, repite ${data.valor_repetido} en iteración ${data.iteracion_repetida}`;
       txt += `)`;
+      if (data.teorico) txt += " [estimación teórica]";
       if (data.periodo_completo) txt += " — ¡PERÍODO COMPLETO!";
       periodoEl.className = "periodo-result ok";
       periodoEl.textContent = txt;
@@ -672,6 +1191,7 @@ function limpiar(modo) {
   document.getElementById(modo + "-error").style.display = "none";
   const periodoEl = document.getElementById(modo + "-periodo");
   if (periodoEl) { periodoEl.className = "periodo-result"; periodoEl.style.display = "none"; }
+  destruirGraficos(modo);
 }
 
 function simularLV() {
@@ -705,6 +1225,7 @@ function simularLV() {
         tbody.appendChild(tr);
       }
     });
+    crearGraficosLV(data);
   })
   .catch(() => {
     errEl.textContent = "Error de conexión";
@@ -807,6 +1328,1271 @@ function enviarAPruebas(modo) {
   document.querySelector('[data-tab="tests"]').classList.add("active");
   document.getElementById("tab-tests").classList.add("active");
 }
+
+// ── Ruleta ──
+
+const RUEDA_EUROPEA = [0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+const ROJOS_RUEDA = new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const CHIP_COLORS = {1:"#95a5a6",5:"#e74c3c",10:"#3498db",25:"#2ecc71",100:"#2c3e50",500:"#9b59b6"};
+
+// ── Audio ──
+let roulAudioCtx = null;
+function roulGetAudioCtx() { if (!roulAudioCtx) roulAudioCtx = new (window.AudioContext||window.webkitAudioContext)(); return roulAudioCtx; }
+function roulPlayTone(freq,dur,type="sine",vol=0.15){
+  try{
+    const ctx=roulGetAudioCtx();
+    const o=ctx.createOscillator();const g=ctx.createGain();
+    o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function sonidoClick(){roulPlayTone(900,0.06,"square",0.08)}
+function sonidoChip(){roulPlayTone(600,0.05,"sine",0.06);setTimeout(()=>roulPlayTone(800,0.04,"sine",0.04),40)}
+function sonidoSpin(){for(let i=0;i<25;i++)setTimeout(()=>roulPlayTone(150+i*12,0.08,"sawtooth",0.04),i*40)}
+function sonidoTick(){roulPlayTone(1200,0.02,"square",0.03)}
+function sonidoWin(){roulPlayTone(523,0.12,"sine",0.12);setTimeout(()=>roulPlayTone(659,0.12,"sine",0.12),120);setTimeout(()=>roulPlayTone(784,0.25,"sine",0.12),240)}
+function sonidoLose(){roulPlayTone(250,0.25,"sawtooth",0.1);setTimeout(()=>roulPlayTone(180,0.35,"sawtooth",0.1),250)}
+
+const roulState = {
+  chip: 10, bets: [], spinning: false, saldo: 10000, giros: 0,
+  history: [],
+  stats: { total:0, pct_rojo:0, pct_negro:0, pct_verde:0, pct_par:0, pct_impar:0, pct_bajo:0, pct_alto:0, racha_rojo:0, racha_negro:0, racha_par:0, racha_impar:0, calientes:[], frios:[] },
+  animFrame: null, tickTimer: null,
+};
+
+function roulGetColor(n) { return n === 0 ? "verde" : ROJOS_RUEDA.has(n) ? "rojo" : "negro"; }
+function roulGetHex(n) { return n === 0 ? "#27ae60" : ROJOS_RUEDA.has(n) ? "#e74c3c" : "#2c3e50"; }
+function roulGetEmoji(n) { const c=roulGetColor(n); return c==="rojo"?"🔴":c==="negro"?"⚫":"🟢"; }
+
+function roulInitTable() {
+  const grid = document.getElementById("roul-number-grid");
+  const filas = [
+    [3,6,9,12,15,18,21,24,27,30,33,36],
+    [2,5,8,11,14,17,20,23,26,29,32,35],
+    [1,4,7,10,13,16,19,22,25,28,31,34],
+  ];
+  for (const nums of filas) {
+    for (const n of nums) {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.style.background = roulGetHex(n);
+      btn.textContent = n; btn.dataset.num = n;
+      btn.onclick = () => roulBetNumber(n);
+      grid.appendChild(btn);
+    }
+  }
+  const colDiv = document.getElementById("roul-col-bets");
+  for (let c = 1; c <= 3; c++) {
+    const btn = document.createElement("button");
+    btn.className = "num-btn"; btn.style.background = "#e67e22"; btn.style.width = "108px";
+    btn.textContent = "2:1"; btn.onclick = () => roulBetColumn(c);
+    colDiv.appendChild(btn);
+  }
+  const extDiv = document.getElementById("roul-ext-bets");
+  for (const [txt, tipo, bg] of [["1-18","bajo","#16a085"],["PAR","par","#2980b9"],["ROJO","rojo","#e74c3c"],["NEGRO","negro","#2c3e50"],["IMPAR","impar","#8e44ad"],["19-36","alto","#d35400"]]) {
+    const btn = document.createElement("button");
+    btn.textContent = txt; btn.dataset.tipo = tipo;
+    btn.style.cssText = `background:${bg};color:#fff;border:none;border-radius:3px;padding:4px 10px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s`;
+    btn.onclick = () => roulBetExternal(tipo);
+    extDiv.appendChild(btn);
+  }
+  const docDiv = document.getElementById("roul-dozen-bets");
+  for (let d = 1; d <= 3; d++) {
+    const btn = document.createElement("button");
+    btn.textContent = d + "ª DOCENA"; btn.dataset.doc = d;
+    btn.style.cssText = "background:#8e44ad;color:#fff;border:none;border-radius:3px;padding:4px 10px;font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s";
+    btn.onclick = () => roulBetDozen(d);
+    docDiv.appendChild(btn);
+  }
+}
+
+function roulSelectChip(val) {
+  sonidoClick();
+  roulState.chip = val;
+  document.getElementById("roul-chip-label").textContent = val;
+  document.querySelectorAll(".chip-btn").forEach(b => b.classList.remove("active-chip"));
+  document.querySelector(`.chip-btn[data-val="${val}"]`).classList.add("active-chip");
+}
+
+function roulAddBet(bet) {
+  if (roulState.chip > roulState.saldo) { showRoulError("Saldo insuficiente"); return false; }
+  sonidoChip();
+  roulState.bets.push(bet);
+  roulState.saldo -= roulState.chip;
+  roulUpdateUI(); roulUpdateChips(); roulUpdateApuestasList();
+  return true;
+}
+
+function roulBetNumber(num) {
+  if (roulState.spinning) return;
+  roulAddBet({ tipo:"straight", monto:roulState.chip, numero:num });
+}
+function roulBetExternal(tipo) {
+  if (roulState.spinning) return;
+  roulAddBet({ tipo, monto:roulState.chip });
+}
+function roulBetDozen(d) {
+  if (roulState.spinning) return;
+  roulAddBet({ tipo:"dozen", monto:roulState.chip, docena:d });
+}
+function roulBetColumn(c) {
+  if (roulState.spinning) return;
+  roulAddBet({ tipo:"column", monto:roulState.chip, columna:c });
+}
+
+function roulUpdateChips() {
+  document.querySelectorAll(".num-btn").forEach(b => {
+    const n = parseInt(b.dataset.num);
+    const count = roulState.bets.filter(be => be.tipo === "straight" && be.numero === n).length;
+    b.classList.toggle("has-chip", count > 0);
+    let m = b.querySelector(".chip-marker");
+    if (count > 0) { if(!m){m=document.createElement("span");m.className="chip-marker";b.appendChild(m)} m.textContent=count; }
+    else if(m) m.remove();
+  });
+}
+
+function roulUpdateApuestasList() {
+  const el = document.getElementById("roul-apuestas-list");
+  const grupos = {};
+  roulState.bets.forEach(b => {
+    const key = b.tipo + (b.numero!==undefined?b.numero:"") + (b.docena||"") + (b.columna||"");
+    if (!grupos[key]) grupos[key] = { ...b, count:0, total:0 };
+    grupos[key].count++; grupos[key].total += b.monto;
+  });
+  let html = "";
+  for (const key in grupos) {
+    const g = grupos[key];
+    let desc = g.tipo;
+    if (g.numero !== undefined) desc = `N°${g.numero}`;
+    else if (g.docena) desc = `${g.docena}ª docena`;
+    else if (g.columna) desc = `Col ${g.columna}`;
+    html += `<span class="apuesta-item">${desc} x${g.count} = ${g.total}</span> `;
+  }
+  el.innerHTML = html || '<span style="color:var(--text-tertiary)">Sin apuestas</span>';
+}
+
+function roulUpdateUI() {
+  document.getElementById("roul-saldo").textContent = roulState.saldo;
+  document.getElementById("roul-apuestas-count").textContent = roulState.bets.length;
+  document.getElementById("roul-total-apostado").textContent = roulState.bets.reduce((s,b) => s+b.monto, 0);
+  document.getElementById("roul-giros-count").textContent = roulState.giros;
+  const pct = Math.max(0, Math.min(100, (roulState.saldo / 10000) * 100));
+  const bar = document.getElementById("roul-balance-bar");
+  bar.style.width = pct + "%";
+  bar.style.background = pct > 30 ? "linear-gradient(90deg,#2ecc71,#27ae60)" : "linear-gradient(90deg,#e74c3c,#c0392b)";
+}
+
+function showRoulError(msg) {
+  const el = document.getElementById("roul-error");
+  el.textContent = msg; el.style.display = "block";
+  setTimeout(() => el.style.display = "none", 2500);
+}
+
+function roulClear() {
+  if (roulState.spinning) return;
+  const devuelto = roulState.bets.reduce((s, b) => s + b.monto, 0);
+  roulState.saldo += devuelto; roulState.bets = [];
+  roulUpdateUI(); roulUpdateChips(); roulUpdateApuestasList();
+}
+
+function roulUndo() {
+  if (roulState.spinning || !roulState.bets.length) return;
+  const last = roulState.bets.pop();
+  roulState.saldo += last.monto;
+  roulUpdateUI(); roulUpdateChips(); roulUpdateApuestasList();
+}
+
+// ── Wheel Drawing ──
+function roulDrawWheel(angle) {
+  const canvas = document.getElementById("roulette-wheel");
+  const ctx = canvas.getContext("2d");
+  const cx = 160, cy = 160, R = 140, segAng = 360 / 37;
+  ctx.clearRect(0, 0, 320, 320);
+
+  // Outer decorative ring
+  const grad = ctx.createRadialGradient(cx,cy,R-5,cx,cy,R+10);
+  grad.addColorStop(0,"#2a1f1f"); grad.addColorStop(0.5,"#c8a96e"); grad.addColorStop(1,"#8b7355");
+  ctx.beginPath(); ctx.arc(cx,cy,R+6,0,2*Math.PI); ctx.fillStyle=grad; ctx.fill();
+  ctx.beginPath(); ctx.arc(cx,cy,R+3,0,2*Math.PI); ctx.strokeStyle="#d4a017"; ctx.lineWidth=2; ctx.stroke();
+
+  // Inner shadow
+  ctx.beginPath(); ctx.arc(cx,cy,R-1,0,2*Math.PI);
+  const innerGrad = ctx.createRadialGradient(cx,cy,R*0.3,cx,cy,R);
+  innerGrad.addColorStop(0,"rgba(0,0,0,0)"); innerGrad.addColorStop(0.7,"rgba(0,0,0,0.1)"); innerGrad.addColorStop(1,"rgba(0,0,0,0.3)");
+  ctx.fillStyle=innerGrad; ctx.fill();
+
+  for (let i = 0; i < 37; i++) {
+    const start = (angle + i * segAng - 90) * Math.PI / 180;
+    const end = start + segAng * Math.PI / 180;
+    const num = RUEDA_EUROPEA[i];
+    const color = num === 0 ? "#27ae60" : ROJOS_RUEDA.has(num) ? "#e74c3c" : "#2c3e50";
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,R,start,end); ctx.closePath();
+    ctx.fillStyle = color; ctx.fill();
+    ctx.strokeStyle = "rgba(26,26,46,0.5)"; ctx.lineWidth = 0.5; ctx.stroke();
+
+    const mid = (start + end) / 2;
+    ctx.save();
+    ctx.translate(cx + R*0.78*Math.cos(mid), cy + R*0.78*Math.sin(mid));
+    ctx.rotate(mid + Math.PI/2);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 9px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(num, 0, 0);
+    ctx.restore();
+  }
+
+  // Center hub with gradient
+  const hubGrad = ctx.createRadialGradient(cx,cy,8,cx,cy,28);
+  hubGrad.addColorStop(0,"#2a1a1a"); hubGrad.addColorStop(0.6,"#1a1a2e"); hubGrad.addColorStop(1,"#0d0d1a");
+  ctx.beginPath(); ctx.arc(cx,cy,28,0,2*Math.PI); ctx.fillStyle=hubGrad; ctx.fill();
+  ctx.strokeStyle="#c8a96e"; ctx.lineWidth=2; ctx.stroke();
+  ctx.fillStyle="#d4a017"; ctx.font="italic 18px 'Times New Roman',serif"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText("R",cx,cy);
+
+  // Pointer with shadow
+  ctx.shadowColor="rgba(0,0,0,0.4)"; ctx.shadowBlur=6;
+  ctx.beginPath(); ctx.moveTo(cx-10,cy-R-12); ctx.lineTo(cx+10,cy-R-12); ctx.lineTo(cx,cy-R+5); ctx.closePath();
+  ctx.fillStyle="#f1c40f"; ctx.fill(); ctx.strokeStyle="#d4a017"; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+// ── Spin ──
+function roulSpin() {
+  if (roulState.spinning) return;
+  if (!roulState.bets.length) { showRoulError("Coloca al menos una apuesta"); return; }
+  if (roulState.animFrame) cancelAnimationFrame(roulState.animFrame);
+  if (roulState.tickTimer) clearInterval(roulState.tickTimer);
+  roulState.spinning = true;
+  document.getElementById("roul-result-overlay").style.display = "none";
+  document.getElementById("roul-spin-btn").disabled = true;
+  sonidoSpin();
+
+  // Tick sound during spin
+  let tickCount = 0;
+  roulState.tickTimer = setInterval(() => { tickCount++; if(tickCount%8===0) sonidoTick(); }, 100);
+
+  const MAP_TIPO = { "rojo":"red", "negro":"black", "par":"even", "impar":"odd", "bajo":"low", "alto":"high" };
+  const apuestasPayload = roulState.bets.map(b => {
+    if (b.tipo === "straight") return { tipo:"straight", monto:b.monto, numero:b.numero };
+    if (b.tipo === "dozen") return { tipo:"dozen", monto:b.monto, docena:b.docena };
+    if (b.tipo === "column") return { tipo:"column", monto:b.monto, columna:b.columna };
+    return { tipo: MAP_TIPO[b.tipo] || b.tipo, monto:b.monto };
+  });
+
+  fetch("/api/roulette/spin", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ apuestas: apuestasPayload })
+  })
+  .then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.error || "Error"); }); return r.json(); })
+  .then(data => {
+    const resultado = data.resultado.numero;
+    const targetIdx = RUEDA_EUROPEA.indexOf(resultado);
+    const segAng = 360 / 37;
+    const targetAngle = 360 - targetIdx * segAng - segAng / 2;
+    const totalRotation = 1440 + targetAngle;
+    roulAnimate(0, 90, totalRotation, data);
+  })
+  .catch(err => { showRoulError(err.message); roulState.spinning = false; document.getElementById("roul-spin-btn").disabled = false; });
+}
+
+function roulAnimate(frame, total, totalRot, data) {
+  const t = frame / total;
+  const eased = 1 - Math.pow(1 - t, 3);
+  roulDrawWheel(totalRot * eased);
+
+  if (frame < total) {
+    roulState.animFrame = requestAnimationFrame(() => roulAnimate(frame + 1, total, totalRot, data));
+  } else {
+    if (roulState.tickTimer) clearInterval(roulState.tickTimer);
+    roulShowResult(data);
+  }
+}
+
+function roulShowResult(data) {
+  const res = data.resultado;
+  const n = res.numero;
+  const color = roulGetColor(n);
+  const ganancia = data.ganancia_total || 0;
+
+  // Big result overlay
+  const overlay = document.getElementById("roul-result-overlay");
+  overlay.style.display = "flex";
+  overlay.style.background = roulGetHex(n);
+  overlay.style.boxShadow = `0 0 40px ${roulGetHex(n)}80`;
+  overlay.innerHTML = `<div class="big-num">${n}</div><div class="big-label">${color.toUpperCase()}</div>${ganancia>0?`<div class="big-payout">+${ganancia}</div>`:""}`;
+
+  // Recreate animation by removing and re-adding
+  overlay.style.animation = "none";
+  overlay.offsetHeight; // trigger reflow
+  overlay.style.animation = "";
+
+  const ultimoEl = document.getElementById("roul-ultimo");
+  ultimoEl.innerHTML = `${roulGetEmoji(n)} <strong>${n}</strong> — ${color.toUpperCase()}`;
+  ultimoEl.style.background = roulGetHex(n) + "33";
+  ultimoEl.style.border = `1px solid ${roulGetHex(n)}66`;
+
+  const ganEl = document.getElementById("roul-ganancia");
+  if (ganancia > 0) {
+    sonidoWin();
+    ganEl.innerHTML = `<span style="color:#2ecc71;font-weight:700">GANASTE +${ganancia} créditos 🎉</span>`;
+  } else {
+    sonidoLose();
+    ganEl.innerHTML = `<span style="color:#e74c3c">Sin ganancia esta vez</span>`;
+  }
+
+  roulState.saldo = data.saldo || roulState.saldo;
+  roulState.giros++;
+  roulState.history.push(n);
+  if (roulState.history.length > 20) roulState.history.shift();
+  if (data.stats) roulState.stats = data.stats;
+
+  roulUpdateUI(); roulUpdateHistory(); roulUpdateStats();
+  roulState.bets = [];
+  roulUpdateChips(); roulUpdateApuestasList();
+  roulState.spinning = false;
+  document.getElementById("roul-spin-btn").disabled = false;
+}
+
+function roulUpdateHistory() {
+  const el = document.getElementById("roul-historial");
+  document.getElementById("roul-hist-counter").textContent = roulState.history.length + "/20";
+  if (!roulState.history.length) { el.innerHTML = '<span style="color:var(--text-tertiary);font-size:.82rem">—</span>'; return; }
+  el.innerHTML = [...roulState.history].reverse().map(n =>
+    `<span class="roul-hist-dot" style="background:${roulGetHex(n)}">${n}</span>`
+  ).join("");
+}
+
+function roulUpdateStats() {
+  const s = roulState.stats;
+  const el = document.getElementById("roul-stats");
+  if (!s.total) { el.innerHTML = '<div style="text-align:center;padding:12px;font-size:.82rem;color:var(--text-tertiary)">Sin datos — juega algunos giros</div>'; return; }
+
+  const bar = (pct, bg) => `<div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.max(pct,2)}%;background:${bg}"></div></div>`;
+
+  let html = `<div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-secondary);margin-bottom:6px">
+    <span>Total: ${s.total} giros</span>
+    <span>Calientes: ${(s.calientes||[]).join(",")}</span>
+    <span>Fríos: ${(s.frios||[]).join(",")}</span>
+  </div>`;
+  html += `<div class="stat-row"><span style="width:45px">Rojo</span>${bar(s.pct_rojo,"#e74c3c")}<span style="width:35px;text-align:right">${s.pct_rojo}%</span></div>`;
+  html += `<div class="stat-row"><span style="width:45px">Negro</span>${bar(s.pct_negro,"#2c3e50")}<span style="width:35px;text-align:right">${s.pct_negro}%</span></div>`;
+  html += `<div class="stat-row"><span style="width:45px">Verde</span>${bar(s.pct_verde,"#27ae60")}<span style="width:35px;text-align:right">${s.pct_verde}%</span></div>`;
+  html += `<div class="stat-row"><span style="width:45px">Par</span>${bar(s.pct_par,"#2980b9")}<span style="width:35px;text-align:right">${s.pct_par}%</span></div>`;
+  html += `<div class="stat-row"><span style="width:45px">Impar</span>${bar(s.pct_impar,"#8e44ad")}<span style="width:35px;text-align:right">${s.pct_impar}%</span></div>`;
+  html += `<div style="display:flex;gap:12px;margin-top:6px;font-size:.75rem;color:var(--text-secondary)">
+    <span>Racha rojo: <strong>${s.racha_rojo}</strong></span>
+    <span>Racha negro: <strong>${s.racha_negro}</strong></span>
+    <span>Racha par: <strong>${s.racha_par}</strong></span>
+    <span>Racha impar: <strong>${s.racha_impar}</strong></span>
+  </div>`;
+  el.innerHTML = html;
+}
+
+// ── Simulación Covid ──
+const COVID_COLORS = {0: "#2563eb", 1: "#b91c1c", 2: "#16a34a", 3: "#0f172a", 4: "#e2e8f0"};
+let covidFrames = null;
+let covidFrameIdx = 0;
+let covidRunning = false;
+let covidPaused = false;
+let covidTimer = null;
+
+function covidIniciar() {
+  const errEl = document.getElementById("covid-error");
+  errEl.style.display = "none";
+  const body = {
+    filas: parseInt(document.getElementById("covid-filas").value) || 50,
+    columnas: parseInt(document.getElementById("covid-columnas").value) || 50,
+    densidad_poblacion: parseFloat(document.getElementById("covid-densidad").value) || 0.85,
+    infectados_iniciales: parseInt(document.getElementById("covid-infectados").value) || 5,
+    probabilidad_contagio: parseFloat(document.getElementById("covid-contagio").value) || 0.3,
+    dias_recuperacion: parseInt(document.getElementById("covid-recuperacion").value) || 14,
+    probabilidad_muerte: parseFloat(document.getElementById("covid-muerte").value) || 0.02,
+    iteraciones: parseInt(document.getElementById("covid-iter").value) || 100,
+    semilla: Date.now(),
+  };
+  fetch("/api/covid_sim", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = "block"; return; }
+    covidFrames = data;
+    covidFrameIdx = 0;
+    covidRunning = true;
+    covidPaused = false;
+    document.getElementById("covid-btn-iniciar").disabled = true;
+    document.getElementById("covid-btn-pausa").disabled = false;
+    document.getElementById("covid-btn-pausa").textContent = "⏸ Pausar";
+    document.getElementById("covid-btn-paso").disabled = false;
+    covidDibujar(data[0]);
+    covidAvanzar();
+  })
+  .catch(() => { errEl.textContent = "Error de conexión"; errEl.style.display = "block"; });
+}
+
+function covidPausar() {
+  const btn = document.getElementById("covid-btn-pausa");
+  if (covidPaused) {
+    covidPaused = false;
+    btn.textContent = "⏸ Pausar";
+    covidAvanzar();
+  } else {
+    covidPaused = true;
+    btn.textContent = "▶ Reanudar";
+    if (covidTimer) { clearTimeout(covidTimer); covidTimer = null; }
+  }
+}
+
+function covidPaso() {
+  if (!covidRunning || !covidFrames) return;
+  if (covidPaused) covidPaused = false;
+  covidAvanzar();
+}
+
+function covidAvanzar() {
+  if (!covidRunning || covidPaused || !covidFrames) return;
+  covidFrameIdx++;
+  if (covidFrameIdx >= covidFrames.length) {
+    covidDetener();
+    return;
+  }
+  covidDibujar(covidFrames[covidFrameIdx]);
+  const vel = parseInt(document.getElementById("covid-velocidad").value) || 100;
+  covidTimer = setTimeout(covidAvanzar, Math.max(10, vel));
+}
+
+function covidDibujar(data) {
+  const total = data.sanos + data.infectados + data.recuperados + data.fallecidos;
+  const pob = total || 1;
+  function pct(v) { return (v / pob * 100).toFixed(1); }
+  const iterText = `Iteración: ${data.iteracion}`;
+
+  document.getElementById("covid-iteracion").textContent = iterText;
+  document.getElementById("covid-sanos").textContent = `${data.sanos} (${pct(data.sanos)}%)`;
+  document.getElementById("covid-infectados-count").textContent = `${data.infectados} (${pct(data.infectados)}%)`;
+  document.getElementById("covid-recuperados").textContent = `${data.recuperados} (${pct(data.recuperados)}%)`;
+  document.getElementById("covid-fallecidos").textContent = `${data.fallecidos} (${pct(data.fallecidos)}%)`;
+  document.getElementById("covid-vacio").textContent = `${data.vacio} (${(data.vacio / (data.grid.length * data.grid[0].length) * 100).toFixed(1)}%)`;
+
+  // Barras de poblacion
+  const maxP = Math.max(data.sanos, data.infectados, data.recuperados, data.fallecidos, 1);
+  document.getElementById("covid-bar-sanos").style.width = (data.sanos / maxP * 100) + "%";
+  document.getElementById("covid-bar-infectados").style.width = (data.infectados / maxP * 100) + "%";
+  document.getElementById("covid-bar-recuperados").style.width = (data.recuperados / maxP * 100) + "%";
+  document.getElementById("covid-bar-fallecidos").style.width = (data.fallecidos / maxP * 100) + "%";
+  document.getElementById("covid-bar-vacio").style.width = (data.vacio / maxP * 100) + "%";
+
+  // Resumen
+  if (data.infectados > (covidMaxInfectados || 0)) covidMaxInfectados = data.infectados;
+  const totalFin = data.recuperados + data.fallecidos;
+  const tasa = totalFin > 0 ? (data.fallecidos / totalFin * 100).toFixed(1) : "0.0";
+  document.getElementById("covid-peak").textContent = `${covidMaxInfectados} (${pct(covidMaxInfectados)}%)`;
+  document.getElementById("covid-total-rec").textContent = `${data.recuperados} rec / ${data.fallecidos} fall`;
+  document.getElementById("covid-tasa-mort").textContent = `${tasa}%`;
+
+  // Progreso
+  const totalIter = covidFrames ? covidFrames.length - 1 : 1;
+  const pctP = Math.min(100, Math.round(data.iteracion / totalIter * 100));
+  document.getElementById("covid-progress-label").textContent = `Progreso: ${pctP}%`;
+  document.getElementById("covid-progress-bar").style.width = pctP + "%";
+
+  covidDibujarGrid(data);
+  covidDibujarEvolucion();
+}
+
+let covidMaxInfectados = 0;
+
+function covidDibujarGrid(data) {
+  const canvas = document.getElementById("covid-canvas");
+  const ctx = canvas.getContext("2d");
+  const grid = data.grid;
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const wrap = document.getElementById("covid-grid-wrap");
+  const maxW = (wrap.clientWidth || 600) - 4;
+  const cellSize = Math.max(3, Math.min(Math.floor(maxW / cols), Math.floor(600 / rows)));
+  const w = cols * cellSize;
+  const h = rows * cellSize;
+  canvas.width = w;
+  canvas.height = h;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+
+  // Rejilla tipo Game of Life: pintar fondo oscuro primero (las líneas de la rejilla)
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(0, 0, w, h);
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      ctx.fillStyle = COVID_COLORS[grid[r][c]] || "#f1f5f9";
+      ctx.fillRect(c * cellSize + 1, r * cellSize + 1, cellSize - 2, cellSize - 2);
+    }
+  }
+}
+
+function covidDibujarEvolucion() {
+  if (!covidFrames || covidFrames.length < 2) return;
+  const canvas = document.getElementById("covid-evolucion");
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = Math.max(rect.width - 4, 200);
+  const H = 220;
+  canvas.width = W * 2; // retina
+  canvas.height = H * 2;
+  canvas.style.width = W + "px";
+  canvas.style.height = H + "px";
+  const ctx = canvas.getContext("2d");
+  ctx.scale(2, 2);
+
+  const pad = {t: 24, r: 16, b: 28, l: 44};
+  const pw = W - pad.l - pad.r;
+  const ph = H - pad.t - pad.b;
+  const totalCeldas = covidFrames[0].grid.length * covidFrames[0].grid[0].length;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Fondo
+  ctx.fillStyle = "#f1f5f9";
+  ctx.fillRect(0, 0, W, H);
+
+  // Ejes
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 0.5;
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = pad.t + (i / yTicks) * ph;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(W - pad.r, y); ctx.stroke();
+  }
+  ctx.strokeStyle = "#94a3b8";
+  ctx.strokeRect(pad.l, pad.t, pw, ph);
+
+  // Labels Y
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "9px sans-serif";
+  ctx.textAlign = "right";
+  for (let i = 0; i <= yTicks; i++) {
+    const y = pad.t + (i / yTicks) * ph;
+    const val = Math.round(totalCeldas - (i / yTicks) * totalCeldas);
+    ctx.fillText(val, pad.l - 4, y + 3);
+  }
+
+  // Labels X
+  ctx.textAlign = "center";
+  const frameCount = covidFrames.length;
+  const xTicks = Math.min(5, frameCount - 1);
+  for (let i = 0; i <= xTicks; i++) {
+    const iter = Math.round((i / xTicks) * (frameCount - 1));
+    const x = pad.l + (iter / Math.max(frameCount - 1, 1)) * pw;
+    ctx.fillText(iter, x, H - pad.b + 14);
+  }
+  ctx.fillText("Iteración", pad.l + pw / 2, H - 2);
+
+  // Stacked area chart
+  const series = [
+    {key: "sanos", color: "#2563eb"},
+    {key: "infectados", color: "#b91c1c"},
+    {key: "recuperados", color: "#16a34a"},
+    {key: "fallecidos", color: "#0f172a"},
+  ];
+
+  // Primero calcular los stacked Y
+  const stacked = covidFrames.map(d => {
+    let acc = 0;
+    return series.map(s => { acc += d[s.key]; return acc; });
+  });
+
+  // Dibujar áreas apiladas
+  series.forEach((s, si) => {
+    ctx.beginPath();
+    ctx.fillStyle = s.color;
+    ctx.globalAlpha = 0.85;
+
+    const firstY = pad.t + ph - (stacked[0][si] / totalCeldas) * ph;
+    ctx.moveTo(pad.l, firstY);
+
+    covidFrames.forEach((d, i) => {
+      const x = pad.l + (i / Math.max(frameCount - 1, 1)) * pw;
+      const y = pad.t + ph - (stacked[i][si] / totalCeldas) * ph;
+      ctx.lineTo(x, y);
+    });
+
+    // Cerrar el área hacia abajo
+    const lastX = pad.l + pw;
+    ctx.lineTo(lastX, pad.t + ph);
+    ctx.lineTo(pad.l, pad.t + ph);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  // Líneas de borde de cada área
+  series.forEach((s, si) => {
+    ctx.beginPath();
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 1.5;
+    covidFrames.forEach((d, i) => {
+      const x = pad.l + (i / Math.max(frameCount - 1, 1)) * pw;
+      const y = pad.t + ph - (stacked[i][si] / totalCeldas) * ph;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+
+  // Peak marker
+  if (covidMaxInfectados > 0) {
+    let peakIter = 0;
+    let peakVal = 0;
+    covidFrames.forEach((d, i) => {
+      if (d.infectados > peakVal) { peakVal = d.infectados; peakIter = i; }
+    });
+    const px = pad.l + (peakIter / Math.max(frameCount - 1, 1)) * pw;
+    const py = pad.t + ph - (peakVal / totalCeldas) * ph;
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = "#ef4444";
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + ph); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#ef4444";
+    ctx.font = "bold 9px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(`Peak: ${peakVal}`, px, pad.t - 4);
+  }
+
+  // Legend
+  ctx.textAlign = "left";
+  let lx = pad.l;
+  series.forEach(s => {
+    ctx.fillStyle = s.color;
+    ctx.fillRect(lx, 4, 12, 12);
+    ctx.fillStyle = "#475569";
+    ctx.font = "bold 10px sans-serif";
+    ctx.fillText(s.key.charAt(0).toUpperCase() + s.key.slice(1), lx + 16, 14);
+    lx += ctx.measureText(s.key.charAt(0).toUpperCase() + s.key.slice(1)).width + 32;
+  });
+}
+
+function covidReiniciar() {
+  if (covidTimer) { clearTimeout(covidTimer); covidTimer = null; }
+  covidFrames = null;
+  covidFrameIdx = 0;
+  covidRunning = false;
+  covidPaused = false;
+  covidMaxInfectados = 0;
+  document.getElementById("covid-btn-iniciar").disabled = false;
+  document.getElementById("covid-btn-pausa").disabled = true;
+  document.getElementById("covid-btn-pausa").textContent = "⏸ Pausar";
+  document.getElementById("covid-btn-paso").disabled = true;
+  document.getElementById("covid-iteracion").textContent = "Iteración: 0";
+  document.getElementById("covid-progress-label").textContent = "Progreso: 0%";
+  document.getElementById("covid-progress-bar").style.width = "0%";
+  const ids = ["covid-sanos","covid-infectados-count","covid-recuperados","covid-fallecidos","covid-vacio"];
+  ids.forEach(id => document.getElementById(id).textContent = "0 (0%)");
+  document.getElementById("covid-peak").textContent = "—";
+  document.getElementById("covid-total-rec").textContent = "—";
+  document.getElementById("covid-tasa-mort").textContent = "—";
+  document.getElementById("covid-bar-sanos").style.width = "0%";
+  document.getElementById("covid-bar-infectados").style.width = "0%";
+  document.getElementById("covid-bar-recuperados").style.width = "0%";
+  document.getElementById("covid-bar-fallecidos").style.width = "0%";
+  document.getElementById("covid-bar-vacio").style.width = "0%";
+  const canvas = document.getElementById("covid-canvas");
+  canvas.width = 0; canvas.height = 0;
+  const evol = document.getElementById("covid-evolucion");
+  const ec = evol.getContext("2d");
+  ec.clearRect(0, 0, evol.width, evol.height);
+}
+
+function covidDetener() {
+  covidRunning = false;
+  covidPaused = false;
+  document.getElementById("covid-btn-iniciar").disabled = false;
+  document.getElementById("covid-btn-pausa").disabled = true;
+  document.getElementById("covid-btn-pausa").textContent = "⏸ Pausar";
+  document.getElementById("covid-btn-paso").disabled = true;
+  if (covidTimer) { clearTimeout(covidTimer); covidTimer = null; }
+}
+
+// ── Quinua ──
+let qnData = null;
+let qnIdx = 0;
+let qnRunning = false;
+let qnPaused = false;
+let qnTimer = null;
+let qnEvoChart = null;
+let qnFaseChart = null;
+
+function quinuaIniciar() {
+  const errEl = document.getElementById("qn-error");
+  errEl.style.display = "none";
+  const body = {
+    alpha: parseFloat(document.getElementById("qn-alpha").value),
+    beta: parseFloat(document.getElementById("qn-beta").value),
+    delta: parseFloat(document.getElementById("qn-delta").value),
+    gamma: parseFloat(document.getElementById("qn-gamma").value),
+    stock0: parseFloat(document.getElementById("qn-x0").value),
+    proceso0: parseFloat(document.getElementById("qn-y0").value),
+    tiempo: parseInt(document.getElementById("qn-tiempo").value),
+  };
+  fetch("/api/quinua_sim", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = "block"; return; }
+    qnData = data.resultados;
+    qnIdx = 0;
+    qnRunning = true;
+    qnPaused = false;
+    document.getElementById("qn-btn-iniciar").disabled = true;
+    document.getElementById("qn-btn-pausa").disabled = false;
+    document.getElementById("qn-btn-pausa").textContent = "⏸ Pausar";
+    document.getElementById("qn-btn-paso").disabled = false;
+    const eq = data.equilibrio;
+    document.getElementById("qn-equilibrio").textContent = `stock=${eq.stock} kg, proc=${eq.procesamiento} kg/día`;
+    // Poblar tabla
+    const tbody = document.getElementById("qn-body");
+    tbody.innerHTML = "";
+    const paso = Math.max(1, Math.floor(data.resultados.length / 50));
+    data.resultados.forEach((d, i) => {
+      if (i % paso === 0 || i === data.resultados.length - 1) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${d.t}</td><td>${d.stock}</td><td>${d.procesamiento}</td>`;
+        tbody.appendChild(tr);
+      }
+    });
+    quinuaDibujar(data);
+    quinuaAvanzar();
+  })
+  .catch(e => { errEl.textContent = e.message; errEl.style.display = "block"; });
+}
+
+function quinuaPausar() {
+  const btn = document.getElementById("qn-btn-pausa");
+  if (qnPaused) {
+    qnPaused = false;
+    btn.textContent = "⏸ Pausar";
+    quinuaAvanzar();
+  } else {
+    qnPaused = true;
+    btn.textContent = "▶ Reanudar";
+    if (qnTimer) { clearTimeout(qnTimer); qnTimer = null; }
+  }
+}
+
+function quinuaPaso() {
+  if (!qnRunning || !qnData) return;
+  if (qnPaused) qnPaused = false;
+  quinuaAvanzar();
+}
+
+function quinuaAvanzar() {
+  if (!qnRunning || qnPaused || !qnData) return;
+  qnIdx++;
+  if (qnIdx >= qnData.length) {
+    qnIdx = qnData.length - 1;
+    quinuaDetener();
+    return;
+  }
+  quinuaDibujar();
+  qnTimer = setTimeout(quinuaAvanzar, 50);
+}
+
+function quinuaDibujar() {
+  if (!qnData) return;
+  const datos = qnData.slice(0, qnIdx + 1);
+  const total = qnData.length;
+  const t = datos.map(d => d.t);
+  const stock = datos.map(d => d.stock);
+  const proc = datos.map(d => d.procesamiento);
+  const tFull = qnData.map(d => d.t);
+  const stockFull = qnData.map(d => d.stock);
+  const procFull = qnData.map(d => d.procesamiento);
+  const actual = qnData[qnIdx];
+
+  document.getElementById("qn-paso").textContent = `${qnIdx} / ${total}`;
+  document.getElementById("qn-stock").textContent = `${Math.round(actual.stock)} kg`;
+  document.getElementById("qn-proceso").textContent = `${Math.round(actual.procesamiento)} kg/día`;
+
+  const eqText = document.getElementById("qn-equilibrio").textContent;
+  const eqMatch = eqText.match(/stock=([\d.]+)/);
+  const eqStock = eqMatch ? parseFloat(eqMatch[1]) : null;
+
+  destruirQnChart("qn-evo");
+  destruirQnChart("qn-fase");
+
+  const evoCtx = document.getElementById("qn-evo").getContext("2d");
+  qnEvoChart = new Chart(evoCtx, {
+    type: "line",
+    data: {
+      labels: tFull,
+      datasets: [
+        {
+          label: "Stock de quinua (kg)",
+          data: stockFull,
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22,163,74,0.08)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Procesamiento (kg/día)",
+          data: procFull,
+          borderColor: "#2563eb",
+          backgroundColor: "rgba(37,99,235,0.08)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Stock (recorrido)",
+          data: t.map((_, i) => ({x: t[i], y: stock[i]})),
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22,163,74,0.15)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 3,
+          tension: 0.3,
+          showLine: true,
+        },
+        {
+          label: "Procesamiento (recorrido)",
+          data: t.map((_, i) => ({x: t[i], y: proc[i]})),
+          borderColor: "#2563eb",
+          backgroundColor: "rgba(37,99,235,0.15)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 3,
+          tension: 0.3,
+          showLine: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { font: { size: 10 } } },
+        annotation: eqStock !== null ? {
+          annotations: {
+            eqLine: {
+              type: "line",
+              yMin: eqStock,
+              yMax: eqStock,
+              borderColor: "#7c3aed",
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              label: { content: `Eq stock=${eqStock}`, display: true, position: "end", font: { size: 9 } },
+            },
+          },
+        } : {},
+      },
+      scales: {
+        x: { title: { display: true, text: "Tiempo (días)", font: { size: 9 } } },
+        y: { title: { display: true, text: "Cantidad", font: { size: 9 } } },
+      },
+    },
+  });
+
+  const faseCtx = document.getElementById("qn-fase").getContext("2d");
+  qnFaseChart = new Chart(faseCtx, {
+    type: "scatter",
+    data: {
+      datasets: [
+        {
+          label: "Trayectoria completa",
+          data: stockFull.map((d, i) => ({x: d, y: procFull[i]})),
+          backgroundColor: "rgba(124,58,237,0.15)",
+          borderColor: "#7c3aed",
+          borderWidth: 1.2,
+          pointRadius: 0,
+          showLine: true,
+          tension: 0.3,
+        },
+        {
+          label: "Recorrido actual",
+          data: stock.map((d, i) => ({x: d, y: proc[i]})),
+          backgroundColor: "rgba(124,58,237,0.2)",
+          borderColor: "#7c3aed",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          showLine: true,
+          tension: 0.3,
+        },
+        {
+          label: "Actual",
+          data: [{x: actual.stock, y: actual.procesamiento}],
+          backgroundColor: "#ef4444",
+          borderColor: "#000",
+          borderWidth: 1.5,
+          pointRadius: 6,
+          pointStyle: "circle",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { font: { size: 10 } } },
+      },
+      scales: {
+        x: { title: { display: true, text: "Stock de quinua (kg)", font: { size: 9 } } },
+        y: { title: { display: true, text: "Procesamiento (kg/día)", font: { size: 9 } } },
+      },
+    },
+  });
+}
+
+function quinuaReiniciar() {
+  qnData = null;
+  qnIdx = 0;
+  qnRunning = false;
+  qnPaused = false;
+  if (qnTimer) { clearTimeout(qnTimer); qnTimer = null; }
+  document.getElementById("qn-body").innerHTML = "";
+  document.getElementById("qn-btn-iniciar").disabled = false;
+  document.getElementById("qn-btn-pausa").disabled = true;
+  document.getElementById("qn-btn-pausa").textContent = "⏸ Pausar";
+  document.getElementById("qn-btn-paso").disabled = true;
+  document.getElementById("qn-paso").textContent = "0 / 0";
+  document.getElementById("qn-stock").textContent = "— kg";
+  document.getElementById("qn-proceso").textContent = "— kg/día";
+  document.getElementById("qn-equilibrio").textContent = "—";
+  destruirQnChart("qn-evo");
+  destruirQnChart("qn-fase");
+}
+
+function quinuaDetener() {
+  qnRunning = false;
+  qnPaused = false;
+  document.getElementById("qn-btn-iniciar").disabled = false;
+  document.getElementById("qn-btn-pausa").disabled = true;
+  document.getElementById("qn-btn-pausa").textContent = "⏸ Pausar";
+  document.getElementById("qn-btn-paso").disabled = true;
+  if (qnTimer) { clearTimeout(qnTimer); qnTimer = null; }
+}
+
+function destruirQnChart(id) {
+  const chart = id === "qn-evo" ? qnEvoChart : qnFaseChart;
+  if (chart) { chart.destroy(); }
+  if (id === "qn-evo") qnEvoChart = null;
+  else qnFaseChart = null;
+}
+
+// ── Dólares ──
+let dlData = null;
+let dlIdx = 0;
+let dlRunning = false;
+let dlPaused = false;
+let dlTimer = null;
+let dlEvoChart = null;
+let dlFaseChart = null;
+
+function dolaresIniciar() {
+  const errEl = document.getElementById("dl-error");
+  errEl.style.display = "none";
+  const body = {
+    alpha: parseFloat(document.getElementById("dl-alpha").value),
+    beta: parseFloat(document.getElementById("dl-beta").value),
+    delta: parseFloat(document.getElementById("dl-delta").value),
+    gamma: parseFloat(document.getElementById("dl-gamma").value),
+    dolares0: parseFloat(document.getElementById("dl-x0").value),
+    presion0: parseFloat(document.getElementById("dl-y0").value),
+    tiempo: parseInt(document.getElementById("dl-tiempo").value),
+  };
+  fetch("/api/dolares_sim", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { errEl.textContent = data.error; errEl.style.display = "block"; return; }
+    dlData = data.resultados;
+    dlIdx = 0;
+    dlRunning = true;
+    dlPaused = false;
+    document.getElementById("dl-btn-iniciar").disabled = true;
+    document.getElementById("dl-btn-pausa").disabled = false;
+    document.getElementById("dl-btn-pausa").textContent = "⏸ Pausar";
+    document.getElementById("dl-btn-paso").disabled = false;
+    const eq = data.equilibrio;
+    document.getElementById("dl-equilibrio").textContent = `$=${eq.dolares}, P=${eq.presion}`;
+    dolaresDibujar(data);
+    dolaresAvanzar();
+  })
+  .catch(e => { errEl.textContent = e.message; errEl.style.display = "block"; });
+}
+
+function dolaresPausar() {
+  const btn = document.getElementById("dl-btn-pausa");
+  if (dlPaused) {
+    dlPaused = false;
+    btn.textContent = "⏸ Pausar";
+    dolaresAvanzar();
+  } else {
+    dlPaused = true;
+    btn.textContent = "▶ Reanudar";
+    if (dlTimer) { clearTimeout(dlTimer); dlTimer = null; }
+  }
+}
+
+function dolaresPaso() {
+  if (!dlRunning || !dlData) return;
+  if (dlPaused) dlPaused = false;
+  dolaresAvanzar();
+}
+
+function dolaresAvanzar() {
+  if (!dlRunning || dlPaused || !dlData) return;
+  dlIdx++;
+  if (dlIdx >= dlData.length) {
+    dlIdx = dlData.length - 1;
+    dolaresDetener();
+    return;
+  }
+  dolaresDibujar();
+  dlTimer = setTimeout(dolaresAvanzar, 50);
+}
+
+function dolaresDibujar() {
+  if (!dlData) return;
+  const datos = dlData.slice(0, dlIdx + 1);
+  const total = dlData.length;
+  const t = datos.map(d => d.t);
+  const dol = datos.map(d => d.dolares);
+  const pres = datos.map(d => d.presion);
+  const tFull = dlData.map(d => d.t);
+  const dolFull = dlData.map(d => d.dolares);
+  const presFull = dlData.map(d => d.presion);
+  const actual = dlData[dlIdx];
+
+  document.getElementById("dl-paso").textContent = `${dlIdx} / ${total}`;
+  document.getElementById("dl-dolares").textContent = actual.dolares.toFixed(2);
+  document.getElementById("dl-presion").textContent = actual.presion.toFixed(2);
+
+  const eqText = document.getElementById("dl-equilibrio").textContent;
+  const eqMatch = eqText.match(/\$=([\d.]+)/);
+  const eqDol = eqMatch ? parseFloat(eqMatch[1]) : null;
+
+  destruirChart("dl-evo");
+  destruirChart("dl-fase");
+
+  const evoCtx = document.getElementById("dl-evo").getContext("2d");
+  dlEvoChart = new Chart(evoCtx, {
+    type: "line",
+    data: {
+      labels: tFull,
+      datasets: [
+        {
+          label: "Dólares (disponibilidad)",
+          data: dolFull,
+          borderColor: "#d97706",
+          backgroundColor: "rgba(217,119,6,0.08)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Presión cambiaria",
+          data: presFull,
+          borderColor: "#dc2626",
+          backgroundColor: "rgba(220,38,38,0.08)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 1.5,
+          tension: 0.3,
+        },
+        {
+          label: "Dólares (recorrido)",
+          data: t.map((_, i) => ({x: t[i], y: dol[i]})),
+          borderColor: "#d97706",
+          backgroundColor: "rgba(217,119,6,0.15)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 3,
+          tension: 0.3,
+          showLine: true,
+        },
+        {
+          label: "Presión (recorrido)",
+          data: t.map((_, i) => ({x: t[i], y: pres[i]})),
+          borderColor: "#dc2626",
+          backgroundColor: "rgba(220,38,38,0.15)",
+          fill: false,
+          pointRadius: 0,
+          borderWidth: 3,
+          tension: 0.3,
+          showLine: true,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { font: { size: 10 } } },
+        annotation: eqDol !== null ? {
+          annotations: {
+            eqLine: {
+              type: "line",
+              yMin: eqDol,
+              yMax: eqDol,
+              borderColor: "#10b981",
+              borderWidth: 1.5,
+              borderDash: [5, 5],
+              label: { content: `Eq $=${eqDol}`, display: true, position: "end", font: { size: 9 } },
+            },
+          },
+        } : {},
+      },
+      scales: {
+        x: { title: { display: true, text: "Tiempo", font: { size: 9 } } },
+        y: { title: { display: true, text: "Valor", font: { size: 9 } } },
+      },
+    },
+  });
+
+  // Espacio de fases
+  const faseCtx = document.getElementById("dl-fase").getContext("2d");
+  dlFaseChart = new Chart(faseCtx, {
+    type: "scatter",
+    data: {
+      datasets: [
+        {
+          label: "Trayectoria completa",
+          data: dolFull.map((d, i) => ({x: d, y: presFull[i]})),
+          backgroundColor: "rgba(124,58,237,0.15)",
+          borderColor: "#7c3aed",
+          borderWidth: 1.2,
+          pointRadius: 0,
+          showLine: true,
+          tension: 0.3,
+        },
+        {
+          label: "Recorrido actual",
+          data: dol.map((d, i) => ({x: d, y: pres[i]})),
+          backgroundColor: "rgba(124,58,237,0.2)",
+          borderColor: "#7c3aed",
+          borderWidth: 2.5,
+          pointRadius: 0,
+          showLine: true,
+          tension: 0.3,
+        },
+        {
+          label: "Actual",
+          data: [{x: actual.dolares, y: actual.presion}],
+          backgroundColor: "#ef4444",
+          borderColor: "#000",
+          borderWidth: 1.5,
+          pointRadius: 6,
+          pointStyle: "circle",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { font: { size: 10 } } },
+      },
+      scales: {
+        x: { title: { display: true, text: "Dólares (disponibilidad)", font: { size: 9 } } },
+        y: { title: { display: true, text: "Presión cambiaria", font: { size: 9 } } },
+      },
+    },
+  });
+}
+
+function dolaresReiniciar() {
+  dlData = null;
+  dlIdx = 0;
+  dlRunning = false;
+  dlPaused = false;
+  if (dlTimer) { clearTimeout(dlTimer); dlTimer = null; }
+  document.getElementById("dl-btn-iniciar").disabled = false;
+  document.getElementById("dl-btn-pausa").disabled = true;
+  document.getElementById("dl-btn-pausa").textContent = "⏸ Pausar";
+  document.getElementById("dl-btn-paso").disabled = true;
+  document.getElementById("dl-paso").textContent = "0 / 0";
+  document.getElementById("dl-dolares").textContent = "—";
+  document.getElementById("dl-presion").textContent = "—";
+  document.getElementById("dl-equilibrio").textContent = "—";
+  destruirChart("dl-evo");
+  destruirChart("dl-fase");
+}
+
+function dolaresDetener() {
+  dlRunning = false;
+  dlPaused = false;
+  document.getElementById("dl-btn-iniciar").disabled = false;
+  document.getElementById("dl-btn-pausa").disabled = true;
+  document.getElementById("dl-btn-pausa").textContent = "⏸ Pausar";
+  document.getElementById("dl-btn-paso").disabled = true;
+  if (dlTimer) { clearTimeout(dlTimer); dlTimer = null; }
+}
+
+function destruirChart(id) {
+  const chart = id === "dl-evo" ? dlEvoChart : dlFaseChart;
+  if (chart) { chart.destroy(); }
+  if (id === "dl-evo") dlEvoChart = null;
+  else dlFaseChart = null;
+}
+
+// Init
+roulInitTable();
+roulDrawWheel(0);
+
+// ── Music Player (YouTube) ──
+const MUSIC_VIDEO = "yaHf1FwMYA4";
+let musicPlayer = null;
+let musicReady = false;
+
+function onYouTubeIframeAPIReady() {
+  musicPlayer = new YT.Player("music-youtube", {
+    width: 0, height: 0,
+    videoId: MUSIC_VIDEO,
+    playerVars: { autoplay: 0, controls: 0, disablekb: 1, fs: 0, modestbranding: 1, playsinline: 1, rel: 0 },
+    events: {
+      onReady: () => { musicReady = true; },
+      onStateChange: e => {
+        const btn = document.getElementById("mb-play");
+        if (btn) btn.innerHTML = e.data === YT.PlayerState.PLAYING ? PAUSE_ICON : PLAY_ICON;
+      }
+    }
+  });
+}
+
+const PLAY_ICON = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+const PAUSE_ICON = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+
+function musicToggle() {
+  if (!musicReady) return;
+  const state = musicPlayer.getPlayerState();
+  if (state === YT.PlayerState.PLAYING) musicPlayer.pauseVideo();
+  else musicPlayer.playVideo();
+}
+
+function musicSetVol(val) {
+  if (musicReady) musicPlayer.setVolume(val);
+}
 </script>
+<div id="music-youtube"></div>
+<div class="music-bar">
+  <button class="mb-btn" id="mb-play" onclick="musicToggle()"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+  <span class="mb-title">🎵 Fondue — Instrumental</span>
+  <div class="mb-vol">
+    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 8.5v7a4.47 4.47 0 0 0 2.5-3.5zm2.5 0A7.5 7.5 0 0 0 14 5.5v2a5.5 5.5 0 0 1 0 9v2a7.5 7.5 0 0 0 5-6.5z"/></svg>
+    <input type="range" min="0" max="100" value="50" oninput="musicSetVol(this.value)">
+  </div>
+</div>
 </body>
 </html>

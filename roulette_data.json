@@ -1,0 +1,105 @@
+{
+  "saldo": 43920,
+  "historial": [
+    {
+      "numero": 33,
+      "apuestas": 1,
+      "ganancia": 20,
+      "saldo": 10010
+    },
+    {
+      "numero": 0,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 9510
+    },
+    {
+      "numero": 28,
+      "apuestas": 1,
+      "ganancia": 1500,
+      "saldo": 10510
+    },
+    {
+      "numero": 35,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 10010
+    },
+    {
+      "numero": 21,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 9510
+    },
+    {
+      "numero": 19,
+      "apuestas": 1,
+      "ganancia": 18000,
+      "saldo": 27010
+    },
+    {
+      "numero": 9,
+      "apuestas": 2,
+      "ganancia": 0,
+      "saldo": 26010
+    },
+    {
+      "numero": 16,
+      "apuestas": 2,
+      "ganancia": 19000,
+      "saldo": 44010
+    },
+    {
+      "numero": 1,
+      "apuestas": 2,
+      "ganancia": 0,
+      "saldo": 43010
+    },
+    {
+      "numero": 15,
+      "apuestas": 3,
+      "ganancia": 1020,
+      "saldo": 43420
+    },
+    {
+      "numero": 6,
+      "apuestas": 1,
+      "ganancia": 1500,
+      "saldo": 44420
+    },
+    {
+      "numero": 18,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 43920
+    },
+    {
+      "numero": 17,
+      "apuestas": 1,
+      "ganancia": 1500,
+      "saldo": 44920
+    },
+    {
+      "numero": 1,
+      "apuestas": 1,
+      "ganancia": 1500,
+      "saldo": 45920
+    },
+    {
+      "numero": 0,
+      "apuestas": 4,
+      "ganancia": 0,
+      "saldo": 43920
+    },
+    {
+      "numero": 14,
+      "apuestas": 3,
+      "ganancia": 1500,
+      "saldo": 43920
+    }
+  ],
+  "mayor_victoria": 19000,
+  "mayor_derrota": 500,
+  "total_ganado": 45540,
+  "total_perdido": 11620
+}

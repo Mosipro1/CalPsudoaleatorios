@@ -11,7 +11,11 @@ from modulos import (
     mersenne_twister,
     lotka_volterra,
     pruebas_estadisticas,
+    covid_sim,
+    dolares,
+    quinua,
 )
+from modulos.roulette import Engine, Player, Statistics
 
 PORT = 8000
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -72,6 +76,34 @@ class Handler(BaseHTTPRequestHandler):
                 r = _formatear_periodo(mersenne_twister.calcular_periodo(int(body["semilla"])))
             elif path.endswith("/lotka_volterra"):
                 r = lotka_volterra.generar(float(body["alpha"]), float(body["beta"]), float(body["delta"]), float(body["gamma"]), float(body["x0"]), float(body["y0"]), float(body["dt"]), int(body["iteraciones"]))
+            # ── dolares ──
+            elif path.endswith("/dolares_sim"):
+                r = dolares.simular(
+                    float(body["alpha"]), float(body["beta"]),
+                    float(body["delta"]), float(body["gamma"]),
+                    float(body["dolares0"]), float(body["presion0"]),
+                    int(body["tiempo"]),
+                )
+            # ── quinua ──
+            elif path.endswith("/quinua_sim"):
+                r = quinua.simular(
+                    float(body["alpha"]), float(body["beta"]),
+                    float(body["delta"]), float(body["gamma"]),
+                    float(body["stock0"]), float(body["proceso0"]),
+                    int(body["tiempo"]),
+                )
+            # ── covid ──
+            elif path.endswith("/covid_sim"):
+                r = covid_sim.simular(
+                    int(body["filas"]), int(body["columnas"]),
+                    float(body["densidad_poblacion"]),
+                    int(body["infectados_iniciales"]),
+                    float(body["probabilidad_contagio"]),
+                    int(body["dias_recuperacion"]),
+                    float(body["probabilidad_muerte"]),
+                    int(body["iteraciones"]),
+                    semilla=body.get("semilla"),
+                )
             # ── pruebas ──
             elif path.endswith("/pruebas_estadisticas"):
                 numeros = [float(x) for x in body.get("numeros", "").replace(",", " ").split()]
@@ -96,13 +128,66 @@ class Handler(BaseHTTPRequestHandler):
                     data.append(pruebas_estadisticas.prueba_independencia_autocorrelacion(numeros, lag, alpha))
                 self._respond(200, "application/json", json.dumps(data).encode())
                 return
+            elif path.endswith("/roulette/spin"):
+                player = Player()
+                stats = Statistics()
+                engine = Engine()
+                apuestas_raw = body.get("apuestas", [])
+                from modulos.roulette.bets import StraightUp, Red, Black, Even, Odd, Low, High, Dozen, Column
+                apuestas = []
+                for a in apuestas_raw:
+                    tipo = a.get("tipo")
+                    monto = int(a.get("monto", 0))
+                    if tipo == "straight":
+                        apuestas.append(StraightUp(monto, int(a["numero"])))
+                    elif tipo == "red":
+                        apuestas.append(Red(monto))
+                    elif tipo == "black":
+                        apuestas.append(Black(monto))
+                    elif tipo == "even":
+                        apuestas.append(Even(monto))
+                    elif tipo == "odd":
+                        apuestas.append(Odd(monto))
+                    elif tipo == "low":
+                        apuestas.append(Low(monto))
+                    elif tipo == "high":
+                        apuestas.append(High(monto))
+                    elif tipo == "dozen":
+                        apuestas.append(Dozen(monto, int(a["docena"])))
+                    elif tipo == "column":
+                        apuestas.append(Column(monto, int(a["columna"])))
+                monto_total = sum(a.monto for a in apuestas)
+                if monto_total > player.saldo:
+                    self._respond(400, "application/json", json.dumps({"error": "Saldo insuficiente"}).encode())
+                    return
+                for a in apuestas:
+                    player.apostar(a.monto)
+                resultado = engine.spin()
+                ganancia_total, detalles = engine.calcular_pagos(apuestas, resultado)
+                player.cobrar(ganancia_total)
+                player.registrar_giro(resultado, apuestas, ganancia_total)
+                player.guardar()
+                stats.registrar(resultado)
+                r = {
+                    "resultado": engine.resultado_dict(resultado),
+                    "ganancia_total": ganancia_total,
+                    "detalles": detalles,
+                    "saldo": player.saldo,
+                    "mayor_victoria": player.mayor_victoria,
+                    "mayor_derrota": player.mayor_derrota,
+                    "beneficio": player.beneficio,
+                    "stats": stats.to_dict(),
+                }
             else:
                 self._respond(404, "application/json", json.dumps({"error": "ruta no encontrada"}).encode())
                 return
 
             if isinstance(r, list) and r and isinstance(r[0], tuple):
-                d = int(body.get("digitos", 6))
-                data = [{"iteracion": it, "xn": xn, "ri": round(ri, d)} for it, xn, ri in r]
+                if len(r[0]) == 4:
+                    data = [{"iteracion": it, "t": t, "presas": x, "depredadores": y} for it, t, x, y in r]
+                else:
+                    d = int(body.get("digitos", 6))
+                    data = [{"iteracion": it, "xn": xn, "ri": round(ri, d)} for it, xn, ri in r]
             else:
                 data = r
 
@@ -119,5 +204,13 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Servidor iniciado en http://localhost:{PORT}")
-    HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    port = PORT
+    for _ in range(10):
+        try:
+            server = HTTPServer(("0.0.0.0", port), Handler)
+            print(f"Servidor iniciado en http://localhost:{port}")
+            server.serve_forever()
+            break
+        except OSError:
+            print(f"⚠ Puerto {port} ocupado, probando {port + 1}...")
+            port += 1
