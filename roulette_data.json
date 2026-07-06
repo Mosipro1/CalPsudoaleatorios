@@ -1,105 +1,249 @@
 {
-  "saldo": 43920,
+  "saldo": 2840,
   "historial": [
     {
-      "numero": 33,
-      "apuestas": 1,
-      "ganancia": 20,
-      "saldo": 10010
-    },
-    {
-      "numero": 0,
+      "numero": 12,
       "apuestas": 1,
       "ganancia": 0,
-      "saldo": 9510
+      "saldo": 9990
     },
     {
-      "numero": 28,
+      "numero": 36,
       "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 9980
+    },
+    {
+      "numero": 15,
+      "apuestas": 1,
+      "ganancia": 30,
+      "saldo": 10000
+    },
+    {
+      "numero": 8,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 9990
+    },
+    {
+      "numero": 31,
+      "apuestas": 3,
       "ganancia": 1500,
-      "saldo": 10510
+      "saldo": 9990
+    },
+    {
+      "numero": 31,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 9490
+    },
+    {
+      "numero": 6,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 8990
+    },
+    {
+      "numero": 30,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 8490
+    },
+    {
+      "numero": 34,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 7990
+    },
+    {
+      "numero": 29,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 7490
+    },
+    {
+      "numero": 24,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 6990
+    },
+    {
+      "numero": 20,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 6490
+    },
+    {
+      "numero": 8,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 5990
+    },
+    {
+      "numero": 19,
+      "apuestas": 1,
+      "ganancia": 1000,
+      "saldo": 6490
+    },
+    {
+      "numero": 32,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 5990
+    },
+    {
+      "numero": 13,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 5490
     },
     {
       "numero": 35,
       "apuestas": 1,
       "ganancia": 0,
-      "saldo": 10010
+      "saldo": 4990
+    },
+    {
+      "numero": 29,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 4490
+    },
+    {
+      "numero": 20,
+      "apuestas": 1,
+      "ganancia": 1000,
+      "saldo": 4990
+    },
+    {
+      "numero": 14,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 4490
+    },
+    {
+      "numero": 12,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 3990
+    },
+    {
+      "numero": 22,
+      "apuestas": 2,
+      "ganancia": 1500,
+      "saldo": 4490
+    },
+    {
+      "numero": 13,
+      "apuestas": 1,
+      "ganancia": 1500,
+      "saldo": 5490
+    },
+    {
+      "numero": 11,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 4990
+    },
+    {
+      "numero": 13,
+      "apuestas": 1,
+      "ganancia": 1000,
+      "saldo": 5490
+    },
+    {
+      "numero": 31,
+      "apuestas": 1,
+      "ganancia": 1000,
+      "saldo": 5990
+    },
+    {
+      "numero": 19,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 5490
+    },
+    {
+      "numero": 34,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 4990
+    },
+    {
+      "numero": 5,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 4490
+    },
+    {
+      "numero": 7,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 3990
+    },
+    {
+      "numero": 20,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 3490
+    },
+    {
+      "numero": 11,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 2990
+    },
+    {
+      "numero": 26,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 2490
     },
     {
       "numero": 21,
       "apuestas": 1,
       "ganancia": 0,
-      "saldo": 9510
+      "saldo": 1990
     },
     {
-      "numero": 19,
-      "apuestas": 1,
-      "ganancia": 18000,
-      "saldo": 27010
-    },
-    {
-      "numero": 9,
-      "apuestas": 2,
-      "ganancia": 0,
-      "saldo": 26010
-    },
-    {
-      "numero": 16,
-      "apuestas": 2,
-      "ganancia": 19000,
-      "saldo": 44010
-    },
-    {
-      "numero": 1,
-      "apuestas": 2,
-      "ganancia": 0,
-      "saldo": 43010
-    },
-    {
-      "numero": 15,
-      "apuestas": 3,
-      "ganancia": 1020,
-      "saldo": 43420
-    },
-    {
-      "numero": 6,
+      "numero": 28,
       "apuestas": 1,
       "ganancia": 1500,
-      "saldo": 44420
+      "saldo": 2990
     },
     {
-      "numero": 18,
+      "numero": 3,
       "apuestas": 1,
       "ganancia": 0,
-      "saldo": 43920
+      "saldo": 2490
     },
     {
-      "numero": 17,
+      "numero": 2,
       "apuestas": 1,
-      "ganancia": 1500,
-      "saldo": 44920
-    },
-    {
-      "numero": 1,
-      "apuestas": 1,
-      "ganancia": 1500,
-      "saldo": 45920
-    },
-    {
-      "numero": 0,
-      "apuestas": 4,
       "ganancia": 0,
-      "saldo": 43920
+      "saldo": 1990
     },
     {
-      "numero": 14,
-      "apuestas": 3,
+      "numero": 24,
+      "apuestas": 1,
+      "ganancia": 0,
+      "saldo": 1490
+    },
+    {
+      "numero": 10,
+      "apuestas": 1,
       "ganancia": 1500,
-      "saldo": 43920
+      "saldo": 2490
+    },
+    {
+      "numero": 25,
+      "apuestas": 1,
+      "ganancia": 360,
+      "saldo": 2840
     }
   ],
-  "mayor_victoria": 19000,
+  "mayor_victoria": 1500,
   "mayor_derrota": 500,
-  "total_ganado": 45540,
-  "total_perdido": 11620
+  "total_ganado": 11890,
+  "total_perdido": 19050
 }

@@ -4,6 +4,22 @@ Proyecto académico para la materia de **Simulación**. Implementa **6 métodos 
 
 Todo accesible desde **interfaz gráfica Tkinter** (escritorio) o **interfaz web** (navegador con Chart.js y modo oscuro).
 
+## Capturas de pantalla
+
+### Interfaz Tkinter (escritorio)
+
+| Generadores de números pseudoaleatorios | Simulación Covid (autómata celular) |
+|:---:|:---:|
+| ![Generadores](images/Captura%20de%20pantalla%202026-07-06%20020735.png) | ![Covid](images/Captura%20de%20pantalla%202026-07-06%20020757.png) |
+
+| Modelo Lotka-Volterra / Dólares / Quinua | Juego de Ruleta Europea |
+|:---:|:---:|
+| ![Modelos](images/Captura%20de%20pantalla%202026-07-06%20020812.png) | ![Ruleta](images/Captura%20de%20pantalla%202026-07-06%20020825.png) |
+
+| Pruebas Estadísticas |
+|:---:|
+| ![Pruebas](images/Captura%20de%20pantalla%202026-07-06%20020843.png) |
+
 ## Requisitos
 
 ### Obligatorios
@@ -521,6 +537,7 @@ Sonidos generados proceduralmente (sine, square, sawtooth, noise) mediante `wave
 
 - **Deshacer**: elimina la última apuesta colocada
 - **Limpiar mesa**: devuelve todas las fichas al saldo
+- **Reiniciar Saldo**: restablece el saldo a 10,000 y borra el historial de giros y las estadísticas
 
 ## Reproductor de música (Tkinter)
 

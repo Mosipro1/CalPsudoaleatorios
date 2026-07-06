@@ -1,3 +1,4 @@
+import math
 import tkinter as tk
 from tkinter import ttk, messagebox
 import matplotlib
@@ -85,7 +86,7 @@ class App:
             return
         self.pe_texto.delete("1.0", "end")
         self.pe_texto.insert("1.0", ", ".join(ris))
-        self.notebook.select(self.notebook.index("end") - 1)
+        self.notebook.select(7)
 
     # ── Helpers para gráficos ──
 
@@ -372,7 +373,9 @@ class App:
             m = int(self.cl_m.get())
             semilla = int(self.cl_semilla.get())
             iteraciones = int(self.cl_iteraciones.get())
-            self._validar_positivos(a, c, m, semilla, iteraciones)
+            self._validar_positivos(a, m, semilla, iteraciones)
+            if c < 0:
+                raise ValueError("c debe ser >= 0")
             resultados = congruencial_lineal.generar(a, c, m, semilla, iteraciones)
             self._cl_limpiar()
             ris = []
@@ -936,10 +939,10 @@ class App:
                          start=start, extent=angulo_por_segmento,
                          fill=color, outline="#1a1a2e", width=1)
 
-            mid_angle = (start + angulo_por_segmento / 2) * 3.14159 / 180
+            mid_angle = math.radians(start + angulo_por_segmento / 2)
             label_r = R * 0.78
-            lx = cx + label_r * mid_angle
-            ly = cy + label_r * mid_angle
+            lx = cx + label_r * math.cos(mid_angle)
+            ly = cy + label_r * math.sin(mid_angle)
             c.create_text(lx, ly, text=str(num), fill="white",
                           font=("Arial", 7, "bold"))
 
@@ -975,6 +978,10 @@ class App:
         self.ruleta_ganancia_label = tk.Label(info_frame, text="",
                                                font=("Arial", 9))
         self.ruleta_ganancia_label.pack(anchor="w")
+        reiniciar_btn = tk.Button(info_frame, text="↺ Reiniciar Saldo",
+                                   font=("Arial", 8), bg="#e67e22", fg="white",
+                                   command=self._ruleta_reiniciar_saldo)
+        reiniciar_btn.pack(anchor="w", pady=(4, 0))
 
         hist_frame = ttk.LabelFrame(parent, text="Historial", padding=5)
         hist_frame.pack(fill="x", pady=(0, 8))
@@ -1096,6 +1103,19 @@ class App:
             texto += f"Fríos: {', '.join(str(x) for x in stats['frios'])}\n"
         self.ruleta_stats_text.insert("1.0", texto)
         self.ruleta_stats_text.config(state="disabled")
+
+    def _ruleta_reiniciar_saldo(self):
+        if self.ruleta_girando:
+            return
+        from modulos.roulette.player import Player
+        self.ruleta_player = Player()
+        self.ruleta_stats = Statistics()
+        self.ruleta_apuestas = []
+        self.ruleta_player.guardar()
+        self._ruleta_actualizar_saldo()
+        self._ruleta_actualizar_historial()
+        self._ruleta_actualizar_stats()
+        messagebox.showinfo("Saldo reiniciado", f"Saldo restablecido a {Player.SALDO_INICIAL}")
 
     def _ruleta_limpiar_mesa(self):
         if self.ruleta_girando:
@@ -1277,7 +1297,10 @@ class App:
         if self.cv_sim.iteracion >= self.cv_iteraciones_total:
             self._covid_detener()
             return
-        vel = max(10, int(self.cv_velocidad.get()))
+        try:
+            vel = max(10, int(self.cv_velocidad.get()))
+        except ValueError:
+            vel = 250
         self.cv_after_id = self.root.after(vel, self._covid_paso)
 
     def _covid_dibujar(self):
@@ -1481,8 +1504,8 @@ class App:
         beta = float(self.dl_beta.get())
         delta = float(self.dl_delta.get())
         gamma = float(self.dl_gamma.get())
-        x0 = int(self.dl_x0.get())
-        y0 = int(self.dl_y0.get())
+        x0 = int(float(self.dl_x0.get()))
+        y0 = int(float(self.dl_y0.get()))
         tiempo = int(self.dl_tiempo.get())
 
         if any(v <= 0 for v in [alpha, beta, delta, gamma, x0, y0, tiempo]):
@@ -1707,8 +1730,8 @@ class App:
         beta = float(self.qn_beta.get())
         delta = float(self.qn_delta.get())
         gamma = float(self.qn_gamma.get())
-        x0 = int(self.qn_x0.get())
-        y0 = int(self.qn_y0.get())
+        x0 = int(float(self.qn_x0.get()))
+        y0 = int(float(self.qn_y0.get()))
         tiempo = int(self.qn_tiempo.get())
 
         if any(v <= 0 for v in [alpha, beta, delta, gamma, x0, y0, tiempo]):

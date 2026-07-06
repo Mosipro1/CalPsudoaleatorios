@@ -128,10 +128,18 @@ class Statistics:
 
     @property
     def numeros_frios(self):
-        if not self.frecuencias:
-            return []
-        menos_comunes = self.frecuencias.most_common()[:-6:-1]
-        return [n for n, _ in menos_comunes]
+        todos = range(37)
+        if self.total == 0:
+            return list(todos[:5])
+        menos_comunes = sorted(todos, key=lambda n: self.frecuencias.get(n, 0))
+        return menos_comunes[:5]
+
+    @classmethod
+    def from_historial(cls, historial):
+        stats = cls()
+        for entry in historial:
+            stats.registrar(entry["numero"])
+        return stats
 
     def ultimos(self, n=20):
         return self.numeros[-n:]

@@ -20,17 +20,9 @@ def generar(semilla, iteraciones):
 
 
 def calcular_periodo(semilla, max_iter=1000000):
-    vistos = {}
-    mt = MersenneTwister(semilla)
-    for i in range(max_iter):
-        ri = mt.random()
-        estado = round(ri, 10)
-        if estado in vistos:
-            return {
-                "unicos": i,
-                "valor_repetido": estado,
-                "iteracion_repetida": vistos[estado] + 1,
-                "longitud_ciclo": i - vistos[estado],
-            }
-        vistos[estado] = i
-    return None
+    return {
+        "unicos": None,
+        "longitud_ciclo": "2^19937 - 1 (teórico)",
+        "periodo_completo": True,
+        "nota": "El período del Mersenne Twister es 2^19937-1, imposible de detectar empíricamente",
+    }

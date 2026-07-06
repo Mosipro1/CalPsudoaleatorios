@@ -23,9 +23,7 @@ class CovidSim:
         self.probabilidad_contagio = probabilidad_contagio
         self.dias_recuperacion = dias_recuperacion
         self.probabilidad_muerte = probabilidad_muerte
-
-        if semilla is not None:
-            random.seed(semilla)
+        self._rng = random.Random(semilla)
 
         self.grid = None
         self.dias_infectado = None
@@ -43,7 +41,7 @@ class CovidSim:
         celdas_ocupadas = int(celdas_totales * self.densidad_poblacion)
 
         posiciones = [(r, c) for r in range(self.filas) for c in range(self.columnas)]
-        random.shuffle(posiciones)
+        self._rng.shuffle(posiciones)
 
         for i in range(min(celdas_ocupadas, len(posiciones))):
             r, c = posiciones[i]
@@ -84,13 +82,13 @@ class CovidSim:
                 if estado == SANO:
                     vecinos = self._vecinos_moore(r, c)
                     infectados_cerca = sum(1 for nr, nc in vecinos if self.grid[nr][nc] == INFECTADO)
-                    if infectados_cerca > 0 and random.random() < self.probabilidad_contagio:
+                    if infectados_cerca > 0 and self._rng.random() < self.probabilidad_contagio:
                         nuevo_grid[r][c] = INFECTADO
                         nuevo_dias[r][c] = 1
 
                 elif estado == INFECTADO:
                     nuevo_dias[r][c] = self.dias_infectado[r][c] + 1
-                    if random.random() < self.probabilidad_muerte:
+                    if self._rng.random() < self.probabilidad_muerte:
                         nuevo_grid[r][c] = FALLECIDO
                     elif nuevo_dias[r][c] >= self.dias_recuperacion:
                         nuevo_grid[r][c] = RECUPERADO

@@ -6,7 +6,7 @@ def generar(a, c, m, semilla, iteraciones):
     xn = semilla
     for i in range(iteraciones):
         xn = (a * xn + c) % m
-        ri = xn / (m - 1)
+        ri = xn / m
         resultados.append((i + 1, xn, ri))
     return resultados
 

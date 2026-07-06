@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Calculadora de Simulación</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <style>
 :root {
@@ -761,6 +762,7 @@ body{padding-bottom:52px}
           <button class="btn btn-primary" onclick="roulSpin()" id="roul-spin-btn"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>GIRAR</button>
           <button class="btn btn-ghost" onclick="roulClear()">Limpiar</button>
           <button class="btn btn-ghost" onclick="roulUndo()">Deshacer</button>
+          <button class="btn btn-ghost" onclick="roulReset()" style="background:#e67e22;color:#fff">↺ Reiniciar Saldo</button>
         </div>
         <div class="roul-apuestas-list" id="roul-apuestas-list" style="margin-bottom:8px;font-size:.78rem;color:var(--text-secondary);min-height:20px"></div>
       </div>
@@ -903,6 +905,9 @@ const ENDPOINTS = {
   mt: "/api/mersenne_twister"
 };
 
+if (typeof Chart !== "undefined" && typeof Chart.register === "function") {
+  try { Chart.register(chartjs_annotation_plugin || window.ChartAnnotation); } catch (e) {}
+}
 const PERIOD_ENDPOINTS = {
   mc: "/api/multiplicador_constante/periodo",
   pm: "/api/productos_medios/periodo",
@@ -1355,7 +1360,8 @@ function sonidoWin(){roulPlayTone(523,0.12,"sine",0.12);setTimeout(()=>roulPlayT
 function sonidoLose(){roulPlayTone(250,0.25,"sawtooth",0.1);setTimeout(()=>roulPlayTone(180,0.35,"sawtooth",0.1),250)}
 
 const roulState = {
-  chip: 10, bets: [], spinning: false, saldo: 10000, giros: 0,
+  chip: 10, bets: [], spinning: false, saldo: 0, giros: 0,
+  saldoInicial: 10000,
   history: [],
   stats: { total:0, pct_rojo:0, pct_negro:0, pct_verde:0, pct_par:0, pct_impar:0, pct_bajo:0, pct_alto:0, racha_rojo:0, racha_negro:0, racha_par:0, racha_impar:0, calientes:[], frios:[] },
   animFrame: null, tickTimer: null,
@@ -1364,6 +1370,21 @@ const roulState = {
 function roulGetColor(n) { return n === 0 ? "verde" : ROJOS_RUEDA.has(n) ? "rojo" : "negro"; }
 function roulGetHex(n) { return n === 0 ? "#27ae60" : ROJOS_RUEDA.has(n) ? "#e74c3c" : "#2c3e50"; }
 function roulGetEmoji(n) { const c=roulGetColor(n); return c==="rojo"?"🔴":c==="negro"?"⚫":"🟢"; }
+
+function roulFetchState() {
+  fetch("/api/roulette/state")
+    .then(r => r.json())
+    .then(data => {
+      if (data.saldo !== undefined) {
+        roulState.saldo = data.saldo;
+        roulState.history = (data.historial || []).slice(-20).map(e => e.numero);
+        roulState.giros = data.stats?.total || 0;
+        roulState.stats = data.stats || roulState.stats;
+        roulUpdateUI(); roulUpdateHistory(); roulUpdateStats();
+      }
+    })
+    .catch(() => {});
+}
 
 function roulInitTable() {
   const grid = document.getElementById("roul-number-grid");
@@ -1416,10 +1437,10 @@ function roulSelectChip(val) {
 }
 
 function roulAddBet(bet) {
-  if (roulState.chip > roulState.saldo) { showRoulError("Saldo insuficiente"); return false; }
+  const totalApostado = roulState.bets.reduce((s, b) => s + b.monto, 0);
+  if (totalApostado + roulState.chip > roulState.saldo) { showRoulError("Saldo insuficiente"); return false; }
   sonidoChip();
   roulState.bets.push(bet);
-  roulState.saldo -= roulState.chip;
   roulUpdateUI(); roulUpdateChips(); roulUpdateApuestasList();
   return true;
 }
@@ -1477,10 +1498,11 @@ function roulUpdateUI() {
   document.getElementById("roul-apuestas-count").textContent = roulState.bets.length;
   document.getElementById("roul-total-apostado").textContent = roulState.bets.reduce((s,b) => s+b.monto, 0);
   document.getElementById("roul-giros-count").textContent = roulState.giros;
-  const pct = Math.max(0, Math.min(100, (roulState.saldo / 10000) * 100));
+  const ref = Math.max(roulState.saldoInicial, roulState.saldo);
+  const pct = Math.max(0, Math.min(100, (roulState.saldo / ref) * 100));
   const bar = document.getElementById("roul-balance-bar");
   bar.style.width = pct + "%";
-  bar.style.background = pct > 30 ? "linear-gradient(90deg,#2ecc71,#27ae60)" : "linear-gradient(90deg,#e74c3c,#c0392b)";
+  bar.style.background = pct >= 50 ? "linear-gradient(90deg,#2ecc71,#27ae60)" : "linear-gradient(90deg,#e74c3c,#c0392b)";
 }
 
 function showRoulError(msg) {
@@ -1489,17 +1511,29 @@ function showRoulError(msg) {
   setTimeout(() => el.style.display = "none", 2500);
 }
 
+function roulReset() {
+  if (roulState.spinning) return;
+  fetch("/api/roulette/reset", { method:"POST", headers:{"Content-Type":"application/json"}, body:"{}" })
+    .then(r => r.json())
+    .then(data => {
+      roulState.saldo = data.saldo;
+      roulState.history = [];
+      roulState.giros = 0;
+      roulState.stats = { total:0, pct_rojo:0, pct_negro:0, pct_verde:0, pct_par:0, pct_impar:0, pct_bajo:0, pct_alto:0, racha_rojo:0, racha_negro:0, racha_par:0, racha_impar:0, calientes:[], frios:[] };
+      roulUpdateUI(); roulUpdateHistory(); roulUpdateStats();
+    })
+    .catch(() => showRoulError("Error al reiniciar saldo"));
+}
+
 function roulClear() {
   if (roulState.spinning) return;
-  const devuelto = roulState.bets.reduce((s, b) => s + b.monto, 0);
-  roulState.saldo += devuelto; roulState.bets = [];
+  roulState.bets = [];
   roulUpdateUI(); roulUpdateChips(); roulUpdateApuestasList();
 }
 
 function roulUndo() {
   if (roulState.spinning || !roulState.bets.length) return;
-  const last = roulState.bets.pop();
-  roulState.saldo += last.monto;
+  roulState.bets.pop();
   roulUpdateUI(); roulUpdateChips(); roulUpdateApuestasList();
 }
 
@@ -1642,7 +1676,7 @@ function roulShowResult(data) {
     ganEl.innerHTML = `<span style="color:#e74c3c">Sin ganancia esta vez</span>`;
   }
 
-  roulState.saldo = data.saldo || roulState.saldo;
+  roulState.saldo = data.saldo !== undefined ? data.saldo : roulState.saldo;
   roulState.giros++;
   roulState.history.push(n);
   if (roulState.history.length > 20) roulState.history.shift();
@@ -2550,6 +2584,7 @@ function destruirChart(id) {
 // Init
 roulInitTable();
 roulDrawWheel(0);
+roulFetchState();
 
 // ── Music Player (YouTube) ──
 const MUSIC_VIDEO = "yaHf1FwMYA4";

@@ -16,6 +16,7 @@ from modulos import (
     quinua,
 )
 from modulos.roulette import Engine, Player, Statistics
+from modulos.roulette.player import SALDO_INICIAL
 
 PORT = 8000
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
@@ -23,13 +24,26 @@ STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 
 def _formatear_periodo(periodo):
     if periodo is None:
-        return {"error": "No se encontró repetición en el límite establecido"}
+        raise ValueError("No se encontró repetición en el límite establecido")
     return periodo
 
 
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = urlparse(self.path).path
+        if path == "/api/roulette/state":
+            player = Player()
+            stats = Statistics.from_historial(player.historial)
+            self._respond(200, "application/json", json.dumps({
+                "saldo": player.saldo,
+                "historial": player.historial,
+                "mayor_victoria": player.mayor_victoria,
+                "mayor_derrota": player.mayor_derrota,
+                "total_ganado": player.total_ganado,
+                "total_perdido": player.total_perdido,
+                "stats": stats.to_dict(),
+            }).encode())
+            return
         if path == "/":
             path = "/index.html"
         filepath = os.path.join(STATIC_DIR, path.lstrip("/"))
@@ -128,16 +142,31 @@ class Handler(BaseHTTPRequestHandler):
                     data.append(pruebas_estadisticas.prueba_independencia_autocorrelacion(numeros, lag, alpha))
                 self._respond(200, "application/json", json.dumps(data).encode())
                 return
+            elif path.endswith("/roulette/reset"):
+                player = Player()
+                player.saldo = SALDO_INICIAL
+                player.historial = []
+                player.mayor_victoria = 0
+                player.mayor_derrota = 0
+                player.total_ganado = 0
+                player.total_perdido = 0
+                player.guardar()
+                r = {"saldo": player.saldo, "mensaje": "Saldo reiniciado"}
             elif path.endswith("/roulette/spin"):
                 player = Player()
-                stats = Statistics()
+                stats = Statistics.from_historial(player.historial)
                 engine = Engine()
                 apuestas_raw = body.get("apuestas", [])
                 from modulos.roulette.bets import StraightUp, Red, Black, Even, Odd, Low, High, Dozen, Column
                 apuestas = []
                 for a in apuestas_raw:
                     tipo = a.get("tipo")
-                    monto = int(a.get("monto", 0))
+                    monto_raw = a.get("monto", 0)
+                    if isinstance(monto_raw, str):
+                        monto_raw = float(monto_raw)
+                    monto = int(monto_raw)
+                    if monto <= 0:
+                        raise ValueError("El monto de cada apuesta debe ser > 0")
                     if tipo == "straight":
                         apuestas.append(StraightUp(monto, int(a["numero"])))
                     elif tipo == "red":

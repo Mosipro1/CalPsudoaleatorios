@@ -16,7 +16,7 @@ class Player:
         self._cargar()
 
     def puede_apostar(self, monto):
-        return monto <= self.saldo
+        return monto > 0 and monto <= self.saldo
 
     def apostar(self, monto):
         if not self.puede_apostar(monto):

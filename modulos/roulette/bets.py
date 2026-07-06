@@ -30,6 +30,10 @@ class Split(Bet):
 class Street(Bet):
     fila: int
 
+    def __post_init__(self):
+        if not (1 <= self.fila <= 12):
+            raise ValueError("Street fila debe estar entre 1 y 12")
+
     def pagar(self, resultado):
         inicio = (self.fila - 1) * 3 + 1
         return self.monto * 12 if inicio <= resultado <= inicio + 2 else 0
@@ -46,6 +50,10 @@ class Corner(Bet):
 @dataclass
 class SixLine(Bet):
     fila_inicio: int
+
+    def __post_init__(self):
+        if not (1 <= self.fila_inicio <= 11):
+            raise ValueError("SixLine fila_inicio debe estar entre 1 y 11")
 
     def pagar(self, resultado):
         inicio = (self.fila_inicio - 1) * 3 + 1
@@ -91,6 +99,10 @@ class High(Bet):
 @dataclass
 class Dozen(Bet):
     docena: int
+
+    def __post_init__(self):
+        if not (1 <= self.docena <= 3):
+            raise ValueError("Dozen docena debe estar entre 1 y 3")
 
     def pagar(self, resultado):
         inicio = (self.docena - 1) * 12 + 1

@@ -6,7 +6,7 @@ def generar(a, m, semilla, iteraciones):
     xn = semilla
     for i in range(iteraciones):
         xn = (a * xn) % m
-        ri = xn / (m - 1)
+        ri = xn / m
         resultados.append((i + 1, xn, ri))
     return resultados
 
@@ -28,6 +28,8 @@ def _periodo_teorico_mcg(a, m):
 
 
 def calcular_periodo(a, m, semilla, max_iter=1000000):
+    if semilla == 0:
+        return {"unicos": 1, "longitud_ciclo": 1, "m": m, "teorico": None, "periodo_completo": False}
     teorico = _periodo_teorico_mcg(a, m)
     if teorico is not None and teorico <= max_iter:
         vistos = {}

@@ -8,7 +8,7 @@ def rk4_step(f, t, y, dt):
 
 def simular(alpha, beta, delta, gamma, dolares0, presion0, tiempo):
     dt = 0.05
-    iteraciones = int(tiempo / dt)
+    iteraciones = int(round(tiempo / dt))
     resultados = []
     x, y = dolares0, presion0
     t = 0.0

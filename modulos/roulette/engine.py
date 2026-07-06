@@ -32,5 +32,5 @@ class Engine:
             "bajo": 1 <= numero <= 18,
             "alto": 19 <= numero <= 36,
             "docena": (numero - 1) // 12 + 1 if numero != 0 else 0,
-            "columna": numero % 3 if numero != 0 else 0,
+            "columna": (numero - 1) % 3 + 1 if numero != 0 else 0,
         }
